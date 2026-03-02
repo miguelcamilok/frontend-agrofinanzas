@@ -18,6 +18,13 @@ export const routes: RouteConfig[] = [
         protected: false,
     },
     {
+        path: '/deployments',
+        component: lazy(() => import('./DeploymentStatus')),
+        layout: 'main',
+        protected: false,
+    },
+    
+    {
         path: '/login',
         component: lazy(() => import('@modules/auth/pages/Auth')),
         layout: 'main',
