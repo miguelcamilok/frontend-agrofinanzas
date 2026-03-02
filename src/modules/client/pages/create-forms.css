@@ -1,0 +1,408 @@
+/* ── Shared Create Form Styles ── */
+.income-container,
+.expense-container,
+.investment-container,
+.debt-container,
+.inventory-container,
+.costs-container {
+    max-width: 650px;
+    margin: 120px auto 50px;
+    padding: 0 20px;
+}
+
+.income-container,
+.expense-container {
+    max-width: 600px;
+}
+
+.income-card,
+.expense-card,
+.investment-card,
+.debt-card,
+.inventory-card,
+.costs-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.income-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(138, 201, 38, 0.2);
+}
+
+.expense-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 107, 107, 0.2);
+}
+
+.investment-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.debt-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.2);
+}
+
+.inventory-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(168, 85, 247, 0.2);
+}
+
+.costs-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(20, 184, 166, 0.2);
+}
+
+/* Headers */
+.income-header,
+.expense-header,
+.investment-header,
+.debt-header,
+.inventory-header,
+.costs-header {
+    padding: 25px 30px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.income-header {
+    background: linear-gradient(135deg, #8ac926, #a8e05f);
+    color: #0b0f0c;
+    box-shadow: 0 4px 12px rgba(138, 201, 38, 0.3);
+}
+
+.expense-header {
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.investment-header {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.debt-header {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #000;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.inventory-header {
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.costs-header {
+    background: linear-gradient(135deg, #14b8a6, #2dd4bf);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+}
+
+/* Bodies */
+.income-body,
+.expense-body,
+.investment-body,
+.debt-body,
+.inventory-body,
+.costs-body {
+    padding: 35px 30px;
+}
+
+/* Form groups */
+.form-group-income,
+.form-group-expense,
+.form-group-investment,
+.form-group-debt,
+.form-group-inventory,
+.form-group-costs {
+    margin-bottom: 25px;
+}
+
+.form-group-debt,
+.form-group-inventory,
+.form-group-costs {
+    margin-bottom: 20px;
+}
+
+.form-group-income label,
+.form-group-expense label,
+.form-group-investment label,
+.form-group-debt label,
+.form-group-inventory label,
+.form-group-costs label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group-income label {
+    color: #a8e05f;
+}
+
+.form-group-expense label {
+    color: #ff8787;
+}
+
+.form-group-investment label {
+    color: #60a5fa;
+}
+
+.form-group-debt label {
+    color: #fbbf24;
+}
+
+.form-group-inventory label {
+    color: #c084fc;
+}
+
+.form-group-costs label {
+    color: #2dd4bf;
+}
+
+.form-group-income input,
+.form-group-income textarea,
+.form-group-expense input,
+.form-group-expense textarea,
+.form-group-investment input,
+.form-group-investment textarea,
+.form-group-investment select,
+.form-group-debt input,
+.form-group-debt textarea,
+.form-group-debt select,
+.form-group-inventory input,
+.form-group-inventory textarea,
+.form-group-inventory select,
+.form-group-costs input,
+.form-group-costs textarea,
+.form-group-costs select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: 2px solid #333;
+    background-color: #282828;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.form-group-income input:focus,
+.form-group-income textarea:focus {
+    border-color: #8ac926;
+    outline: none;
+    box-shadow: 0 0 10px rgba(138, 201, 38, 0.4);
+    background-color: #2a2a2a;
+}
+
+.form-group-expense input:focus,
+.form-group-expense textarea:focus {
+    border-color: #ff6b6b;
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+    background-color: #2a2a2a;
+}
+
+.form-group-investment input:focus,
+.form-group-investment textarea:focus,
+.form-group-investment select:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    background-color: #2a2a2a;
+}
+
+.form-group-debt input:focus,
+.form-group-debt textarea:focus,
+.form-group-debt select:focus {
+    border-color: #f59e0b;
+    outline: none;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    background-color: #2a2a2a;
+}
+
+.form-group-inventory input:focus,
+.form-group-inventory select:focus,
+.form-group-inventory textarea:focus {
+    border-color: #a855f7;
+    outline: none;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+    background-color: #2a2a2a;
+}
+
+.form-group-costs input:focus,
+.form-group-costs select:focus {
+    border-color: #14b8a6;
+    outline: none;
+    box-shadow: 0 0 10px rgba(20, 184, 166, 0.4);
+    background-color: #2a2a2a;
+}
+
+.form-group-income textarea,
+.form-group-expense textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group-inventory select option {
+    background: #1a1a1a;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Submit buttons */
+.btn-income-submit,
+.btn-expense-submit,
+.btn-investment-submit,
+.btn-debt-submit,
+.btn-inventory-submit,
+.btn-costs-submit {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-income-submit {
+    background: linear-gradient(135deg, #8ac926, #a8e05f);
+    color: #0b0f0c;
+    box-shadow: 0 4px 12px rgba(138, 201, 38, 0.3);
+}
+
+.btn-expense-submit {
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-investment-submit {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-debt-submit {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #000;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-inventory-submit {
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.btn-costs-submit {
+    background: linear-gradient(135deg, #14b8a6, #2dd4bf);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+}
+
+.btn-income-submit:hover,
+.btn-expense-submit:hover,
+.btn-investment-submit:hover,
+.btn-debt-submit:hover,
+.btn-inventory-submit:hover,
+.btn-costs-submit:hover {
+    transform: translateY(-2px);
+}
+
+/* Icons */
+.income-icon,
+.expense-icon,
+.investment-icon,
+.debt-icon,
+.inventory-icon,
+.costs-icon {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.income-icon i {
+    font-size: 3rem;
+    color: #8ac926;
+    text-shadow: 0 0 20px rgba(138, 201, 38, 0.5);
+}
+
+.expense-icon i {
+    font-size: 3rem;
+    color: #ff6b6b;
+    text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+}
+
+.investment-icon i {
+    font-size: 3rem;
+    color: #3b82f6;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.debt-icon i {
+    font-size: 3rem;
+    color: #f59e0b;
+    text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+}
+
+.inventory-icon i {
+    font-size: 3rem;
+    color: #a855f7;
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+}
+
+.costs-icon i {
+    font-size: 3rem;
+    color: #14b8a6;
+    text-shadow: 0 0 20px rgba(20, 184, 166, 0.5);
+}
+
+/* Cattle notice */
+.cattle-notice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    font-size: 0.82rem;
+    color: #f59e0b;
+    line-height: 1.5;
+}
+
+.cattle-notice i {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.cattle-notice a {
+    color: #fbbf24;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .inventory-body,
+    .costs-body {
+        padding: 24px 18px;
+    }
+}

@@ -1,0 +1,122 @@
+/* ================================================
+   ADMIN LAYOUT — AgroFinanzas
+   Extracted from admin/layout.blade.php
+   ================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; }
+
+/* ── SIDEBAR ── */
+.admin-sidebar {
+    width: 240px;
+    background: #1a1e14;
+    border-right: 1px solid rgba(138,201,38,0.1);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+}
+.sidebar-logo {
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(138,201,38,0.1);
+}
+.sidebar-logo h1 { font-size: 1.1rem; font-weight: 800; color: #fff; }
+.sidebar-logo h1 span { color: #8ac926; }
+.sidebar-logo p { font-size: 0.68rem; color: #4a5a3a; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+.sidebar-nav { flex: 1; padding: 16px 0; }
+.nav-section-label {
+    padding: 10px 20px 6px;
+    font-size: 0.65rem;
+    color: #3a4a2a;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+}
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 20px;
+    color: #7a8a6a;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+.nav-item:hover { color: #8ac926; background: rgba(138,201,38,0.05); }
+.nav-item.active { color: #8ac926; background: rgba(138,201,38,0.08); border-left-color: #8ac926; }
+.nav-item i { width: 18px; text-align: center; font-size: 0.9rem; }
+
+.sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(138,201,38,0.08);
+}
+.admin-user { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.admin-user__name { font-size: 0.82rem; font-weight: 700; color: #fff; }
+.admin-user__role { font-size: 0.68rem; color: #4a5a3a; }
+.admin-avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #5a8a10, #8ac926);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: #fff; font-weight: 800; flex-shrink: 0;
+}
+.logout-btn {
+    width: 100%;
+    padding: 9px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px;
+    color: #ef4444;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all 0.2s;
+}
+.logout-btn:hover { background: rgba(239,68,68,0.15); }
+
+/* ── MAIN ── */
+.admin-main {
+    margin-left: 240px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #070a05;
+    color: #dde8c8;
+}
+.admin-topbar {
+    background: #1a1e14;
+    border-bottom: 1px solid rgba(138,201,38,0.08);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.topbar-title { font-size: 1.2rem; font-weight: 800; color: #fff; }
+.topbar-title span { color: #8ac926; }
+.topbar-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(138,201,38,0.1);
+    border: 1px solid rgba(138,201,38,0.2);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.72rem; font-weight: 700; color: #8ac926;
+}
+
+.admin-content { padding: 28px; flex: 1; }
+
+/* ── ALERTAS ── */
+.admin-alert {
+    padding: 14px 18px; border-radius: 10px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600;
+}
+.admin-alert--success { background: rgba(138,201,38,0.1); border: 1px solid rgba(138,201,38,0.3); color: #8ac926; }
+.admin-alert--error   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #ef4444; }

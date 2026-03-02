@@ -1,0 +1,561 @@
+/* ================================================
+   EDIT PROFILE v3 — layout tips + formulario
+   ================================================ */
+
+/* Canvas partículas */
+#particles-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+
+/* ---- LAYOUT GENERAL ---- */
+.edit-layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 28px;
+    padding: 50px 24px 60px;
+    min-height: 100vh;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ================================================
+   PANEL IZQUIERDO — TIPS
+   ================================================ */
+.tips-panel {
+    position: sticky;
+    top: 80px;
+    width: 280px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(138, 201, 38, 0.15);
+    border-radius: 18px;
+    padding: 24px 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.tips-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #8ac926;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(138, 201, 38, 0.15);
+}
+
+.tips-header i { font-size: 1.1rem; }
+
+.tips-list {
+    list-style: none;
+    padding: 0; margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tip-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    cursor: default;
+    opacity: 0.45;
+}
+
+.tip-item.active {
+    opacity: 1;
+    background: rgba(138, 201, 38, 0.08);
+    border-color: rgba(138, 201, 38, 0.25);
+}
+
+.tip-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(138, 201, 38, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #8ac926;
+    font-size: 0.8rem;
+    transition: background 0.3s;
+}
+
+.tip-item.active .tip-icon {
+    background: rgba(138, 201, 38, 0.2);
+}
+
+.tip-content strong {
+    display: block;
+    color: #e0e0e0;
+    font-size: 0.82rem;
+    margin-bottom: 3px;
+}
+
+.tip-content p {
+    color: #888;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.tip-item.active .tip-content strong { color: #fff; }
+.tip-item.active .tip-content p      { color: #aaa; }
+
+.tips-footer {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: #555;
+    font-size: 0.73rem;
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.tips-footer i { color: #8ac926; margin-top: 2px; flex-shrink: 0; }
+
+/* ================================================
+   PANEL DERECHO — FORMULARIO
+   ================================================ */
+.profile-wrapper {
+    flex: 1;
+    max-width: 520px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 36px 32px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+
+.profile-title {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #8ac926;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* ---- ALERTAS ---- */
+.alert-success {
+    background: rgba(46, 204, 113, 0.12);
+    border: 1px solid rgba(46, 204, 113, 0.35);
+    color: #2ecc71;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-error {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.35);
+    color: #e74c3c;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-info {
+    background: rgba(52, 152, 219, 0.12);
+    border: 1px solid rgba(52, 152, 219, 0.35);
+    color: #3498db;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ---- FOTO ---- */
+.profile-photo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.profile-photo-circle {
+    position: relative;
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #8ac926;
+    box-shadow: 0 0 20px rgba(138, 201, 38, 0.3);
+    cursor: pointer;
+}
+
+.profile-photo-circle img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.3s;
+}
+
+.photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.25s;
+    cursor: pointer;
+}
+.photo-overlay i { font-size: 1.2rem; color: #8ac926; }
+.profile-photo-circle:hover .photo-overlay { opacity: 1; }
+.profile-photo-circle:hover img { filter: brightness(0.55); }
+
+.photo-hint {
+    text-align: center;
+    color: #555;
+    font-size: 0.72rem;
+    margin-bottom: 22px;
+}
+
+/* ---- CAMPOS ---- */
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+    padding: 2px;
+    transition: background 0.25s;
+}
+
+.field-group:focus-within {
+    background: rgba(138, 201, 38, 0.04);
+}
+
+.field-group label {
+    color: #bbb;
+    font-size: 0.83rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.field-group label i { color: #8ac926; font-size: 0.78rem; }
+
+.optional {
+    color: #555;
+    font-size: 0.73rem;
+    font-weight: 400;
+}
+
+.field-group input,
+.field-select {
+    width: 100%;
+    padding: 10px 13px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9px;
+    color: #fff;
+    font-size: 0.93rem;
+    transition: border 0.25s, box-shadow 0.25s, background 0.25s;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Placeholder muestra el valor actual como guía */
+.field-group input::placeholder { color: #555; font-style: italic; }
+
+.field-group input:focus,
+.field-select:focus {
+    border-color: #8ac926;
+    box-shadow: 0 0 0 3px rgba(138, 201, 38, 0.18);
+    outline: none;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.field-group input.input-error,
+.field-select.input-error {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+}
+
+.field-select option { background: #1a1a1a; color: #fff; }
+
+.field-error {
+    color: #e74c3c;
+    font-size: 0.76rem;
+    margin-top: 2px;
+}
+
+/* ---- BOTÓN ---- */
+.submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #8ac926, #99d98c);
+    border: none;
+    border-radius: 10px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(138, 201, 38, 0.3);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7bb222, #7cb072);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(138, 201, 38, 0.45);
+}
+
+.submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+@media (max-width: 860px) {
+    .edit-layout {
+        flex-direction: column;
+        align-items: center;
+        padding: 30px 16px 50px;
+    }
+
+    .tips-panel {
+        position: static;
+        width: 100%;
+        max-width: 520px;
+    }
+
+    /* En móvil mostrar todos los tips activos */
+    .tip-item { opacity: 1; }
+}
+
+@media (max-width: 500px) {
+    .profile-card { padding: 24px 16px; }
+    .field-row { grid-template-columns: 1fr; }
+}
+/* ── (Todos los estilos anteriores de edit-profile.css se mantienen igual) ──
+   Agrega estos estilos AL FINAL de tu edit-profile.css existente             */
+
+/* ================================================
+   ZONA DE PELIGRO — ELIMINAR CUENTA
+   ================================================ */
+.danger-zone {
+    margin-top: 32px;
+    padding: 20px;
+    border: 1px solid rgba(231, 76, 60, 0.25);
+    border-radius: 12px;
+    background: rgba(231, 76, 60, 0.04);
+}
+
+.danger-zone-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e74c3c;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(231, 76, 60, 0.15);
+}
+
+.danger-zone-header i { font-size: 1rem; }
+
+.danger-desc {
+    color: #888;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+/* ── Botón eliminar principal ────────────────────────────────── */
+.delete-btn {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid rgba(231, 76, 60, 0.45);
+    border-radius: 9px;
+    color: #e74c3c;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.delete-btn:hover {
+    background: rgba(231, 76, 60, 0.1);
+    border-color: #e74c3c;
+    transform: translateY(-1px);
+}
+
+/* ── Inputs código de eliminación (6 dígitos) ────────────────── */
+.delete-code-inputs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.delete-digit {
+    width: 44px;
+    height: 52px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(231, 76, 60, 0.25);
+    border-radius: 10px;
+    color: #e74c3c;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: 'Courier New', monospace;
+    caret-color: #e74c3c;
+}
+
+.delete-digit:focus {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.06);
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+    transform: scale(1.05);
+}
+
+.delete-digit:not(:placeholder-shown) {
+    border-color: rgba(231, 76, 60, 0.5);
+}
+
+/* ── Acciones (confirmar + reenviar) ─────────────────────────── */
+.delete-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.delete-btn-confirm {
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.delete-btn-confirm:hover:not(:disabled) {
+    background: linear-gradient(135deg, #a93226, #c0392b);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.35);
+}
+
+.delete-btn-confirm:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.resend-delete-btn {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    border-radius: 8px;
+    color: #e74c3c;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: 'Poppins', sans-serif;
+    opacity: 0.7;
+}
+
+.resend-delete-btn:hover {
+    opacity: 1;
+    background: rgba(231, 76, 60, 0.06);
+}
+
+/* ── Alerta warning (código enviado) ─────────────────────────── */
+.alert-warning {
+    background: rgba(230, 126, 34, 0.12);
+    border: 1px solid rgba(230, 126, 34, 0.35);
+    color: #e67e22;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 420px) {
+    .delete-digit { width: 36px; height: 44px; font-size: 1.1rem; }
+    .delete-code-inputs { gap: 6px; }
+}

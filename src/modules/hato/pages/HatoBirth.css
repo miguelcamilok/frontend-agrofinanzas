@@ -1,0 +1,198 @@
+.birth-page {
+    max-width: 600px;
+    margin: 110px auto 60px;
+    padding: 0 20px;
+}
+
+.birth-card {
+    background: #1a1e14;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.birth-header {
+    background: linear-gradient(135deg, #065f46, #059669);
+    padding: 24px 28px;
+    color: #fff;
+}
+
+.birth-header h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.birth-header p {
+    font-size: 0.82rem;
+    opacity: 0.8;
+}
+
+.mother-info-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.mother-info-box img {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.mother-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    background: rgba(245, 158, 11, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.mother-info-box__name {
+    font-weight: 700;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.mother-info-box__meta {
+    font-size: 0.78rem;
+    color: #7a8a6a;
+}
+
+.birth-body {
+    padding: 28px;
+}
+
+.fg {
+    margin-bottom: 18px;
+}
+
+.fg label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #dde8c8;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.fg label span {
+    color: #ef4444;
+}
+
+.fg input,
+.fg select,
+.fg textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: #0d0f0a;
+    border: 1.5px solid rgba(138, 201, 38, 0.15);
+    border-radius: 9px;
+    color: #dde8c8;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.fg input:focus,
+.fg select:focus {
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+.fg-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.photo-drop {
+    border: 2px dashed rgba(5, 150, 105, 0.3);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(5, 150, 105, 0.03);
+}
+
+.photo-drop:hover {
+    border-color: #059669;
+    background: rgba(5, 150, 105, 0.07);
+}
+
+.photo-drop i {
+    font-size: 2rem;
+    color: rgba(5, 150, 105, 0.4);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.photo-drop p {
+    font-size: 0.8rem;
+    color: #7a8a6a;
+}
+
+#calfPreview {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 10px;
+    display: none;
+}
+
+.birth-submit {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #059669, #10b981);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.birth-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #7a8a6a;
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin-bottom: 18px;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #f59e0b;
+}

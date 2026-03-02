@@ -1,0 +1,6 @@
+export { default as Home } from './pages/Home'
+export { default as Auth } from './pages/Auth'
+export { default as Verify } from './pages/Verify'
+export { default as Login } from './pages/Login'
+export { default as Register } from './pages/Register'
+export { default as EditProfile } from './pages/EditProfile'

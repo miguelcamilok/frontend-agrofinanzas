@@ -1,0 +1,189 @@
+.cattle-show-page {
+    max-width: 1000px;
+    margin: 110px auto 60px;
+    padding: 0 20px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #7a8a6a;
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #f59e0b;
+}
+
+/* ── HERO CARD ── */
+.show-hero {
+    background: #1a1e14;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    min-height: 320px;
+}
+
+.show-hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.show-hero__placeholder {
+    width: 100%;
+    min-height: 320px;
+    background: linear-gradient(135deg, #1f2418, #141810);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7rem;
+    color: rgba(245, 158, 11, 0.1);
+}
+
+.show-hero__body {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.show-hero__breed {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f59e0b;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+}
+
+.show-hero__title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+    line-height: 1.1;
+}
+
+.show-hero__use {
+    font-size: 0.85rem;
+    color: #7a8a6a;
+    margin-bottom: 28px;
+}
+
+.hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    color: #dde8c8;
+}
+
+.hero-pill i {
+    color: #f59e0b;
+    font-size: 0.75rem;
+}
+
+/* ── SECCIONES ── */
+.info-section {
+    background: #1a1e14;
+    border: 1px solid rgba(138, 201, 38, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.info-section__title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8ac926;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(138, 201, 38, 0.1);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.info-item__label {
+    font-size: 0.68rem;
+    color: #4a5a3a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.info-item__val {
+    font-size: 0.92rem;
+    color: #dde8c8;
+    font-weight: 600;
+}
+
+/* Uso badge */
+.use-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.use-milk {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.use-meat {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.use-dual {
+    background: rgba(138, 201, 38, 0.1);
+    color: #8ac926;
+    border: 1px solid rgba(138, 201, 38, 0.2);
+}
+
+@media (max-width: 640px) {
+    .show-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .show-hero__placeholder {
+        min-height: 220px;
+    }
+
+    .show-hero__title {
+        font-size: 1.6rem;
+    }
+}

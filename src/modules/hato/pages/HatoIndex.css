@@ -1,0 +1,419 @@
+:root {
+    --cattle-brown: #92400e;
+    --cattle-amber: #f59e0b;
+    --cattle-green: #8ac926;
+    --bg-dark: #0d0f0a;
+    --card: #1a1e14;
+    --border: rgba(138, 201, 38, 0.12);
+}
+
+.hato-page {
+    max-width: 1300px;
+    margin: 100px auto 60px;
+    padding: 0 24px;
+}
+
+/* ── HERO ── */
+.hato-hero {
+    background: linear-gradient(135deg, #1a1e14 0%, #0d0f0a 100%);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hato-hero::before {
+    content: '🐄';
+    position: absolute;
+    right: -10px;
+    bottom: -20px;
+    font-size: 8rem;
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.hato-hero__title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.hato-hero__title i {
+    color: var(--cattle-amber);
+}
+
+.hato-hero__sub {
+    color: #7a8a6a;
+    font-size: 0.88rem;
+    margin-top: 4px;
+}
+
+/* ── SUMMARY CARDS ── */
+.summary-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.summary-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1a1e14;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    flex: 1;
+    min-width: 120px;
+    transition: all 0.25s;
+}
+
+.summary-pill:hover {
+    border-color: rgba(138, 201, 38, 0.35);
+    transform: translateY(-2px);
+}
+
+.summary-pill__icon {
+    font-size: 1.5rem;
+}
+
+.summary-pill__num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.summary-pill__label {
+    font-size: 0.72rem;
+    color: #7a8a6a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── BOTONES ACCIÓN ── */
+.hato-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.btn-add-animal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #0d0f0a;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-add-animal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    color: #0d0f0a;
+}
+
+/* ── GRID DE ANIMALES ── */
+.cattle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* ── CARD ANIMAL ── */
+.cattle-card {
+    background: #1a1e14;
+    border: 1px solid rgba(138, 201, 38, 0.12);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.cattle-card:hover {
+    border-color: rgba(245, 158, 11, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Foto del animal */
+.cattle-photo {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    background: #141810;
+}
+
+.cattle-photo-placeholder {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, #1f2418, #141810);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: rgba(245, 158, 11, 0.2);
+}
+
+.cattle-card__body {
+    padding: 18px;
+}
+
+/* Cabecera con nombre y badge */
+.cattle-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 10px;
+}
+
+.cattle-card__name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.cattle-card__tag {
+    font-size: 0.72rem;
+    color: #7a8a6a;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+/* Badges de estado */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.status-active {
+    background: rgba(138, 201, 38, 0.15);
+    color: #8ac926;
+    border: 1px solid rgba(138, 201, 38, 0.3);
+}
+
+.status-sold {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-dead {
+    background: rgba(100, 100, 100, 0.15);
+    color: #888;
+    border: 1px solid rgba(100, 100, 100, 0.3);
+}
+
+/* Info grid */
+.cattle-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.cattle-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cattle-info-item__label {
+    font-size: 0.68rem;
+    color: #4a5a3a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cattle-info-item__val {
+    font-size: 0.85rem;
+    color: #dde8c8;
+    font-weight: 600;
+}
+
+/* Crías (terneros) */
+.calves-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.calves-label {
+    font-size: 0.72rem;
+    color: #7a8a6a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.calves-label i {
+    color: var(--cattle-amber);
+}
+
+.calf-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    color: #f59e0b;
+    margin: 2px;
+}
+
+/* Botones de la card */
+.cattle-card__foot {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    background: transparent;
+}
+
+.card-btn--birth {
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #f59e0b;
+}
+
+.card-btn--birth:hover {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.card-btn--detail {
+    border-color: rgba(138, 201, 38, 0.3);
+    color: #8ac926;
+}
+
+.card-btn--detail:hover {
+    background: rgba(138, 201, 38, 0.1);
+    color: #8ac926;
+}
+
+.card-btn--delete {
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    margin-left: auto;
+}
+
+.card-btn--delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── EMPTY STATE ── */
+.hato-empty {
+    text-align: center;
+    padding: 80px 20px;
+    background: #1a1e14;
+    border: 1px dashed rgba(138, 201, 38, 0.2);
+    border-radius: 20px;
+}
+
+.hato-empty i {
+    font-size: 4rem;
+    color: rgba(245, 158, 11, 0.25);
+    margin-bottom: 20px;
+    display: block;
+}
+
+.hato-empty h3 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.hato-empty p {
+    color: #7a8a6a;
+    font-size: 0.88rem;
+}
+
+/* ── ALERTAS ── */
+.hato-alert {
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.hato-alert--success {
+    background: rgba(138, 201, 38, 0.1);
+    border: 1px solid rgba(138, 201, 38, 0.3);
+    color: #8ac926;
+}
+
+.hato-alert--error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+@media (max-width: 640px) {
+    .hato-hero {
+        flex-direction: column;
+    }
+
+    .cattle-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-row {
+        flex-direction: column;
+    }
+}

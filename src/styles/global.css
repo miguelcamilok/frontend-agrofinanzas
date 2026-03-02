@@ -1,0 +1,77 @@
+/* ================================================
+   GLOBAL STYLES — AgroFinanzas React
+   Base reset and shared styles
+   ================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* ── Reset ── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #050805;
+    color: #dde8c8;
+    min-height: 100vh;
+}
+
+/* ── Bootstrap overrides (keep body structure) ── */
+.d-flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+/* ── FontAwesome CDN loaded in index.html ── */
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0f0a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(138, 201, 38, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(138, 201, 38, 0.5);
+}
+
+/* ── Selection ── */
+::selection {
+    background: rgba(138, 201, 38, 0.3);
+    color: #fff;
+}
+
+/* ── Links ── */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ── Images ── */
+img {
+    max-width: 100%;
+    height: auto;
+}

@@ -1,0 +1,180 @@
+.cattle-form-page {
+    max-width: 700px;
+    margin: 110px auto 60px;
+    padding: 0 20px;
+}
+
+.cattle-form-card {
+    background: #1a1e14;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.cattle-form-header {
+    background: linear-gradient(135deg, #92400e 0%, #f59e0b 100%);
+    padding: 24px 30px;
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cattle-form-body {
+    padding: 32px 30px;
+}
+
+.form-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #f59e0b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 24px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.fg {
+    margin-bottom: 18px;
+}
+
+.fg label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #dde8c8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fg label span {
+    color: #ef4444;
+}
+
+.fg input,
+.fg select,
+.fg textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: #0d0f0a;
+    border: 1.5px solid rgba(138, 201, 38, 0.15);
+    border-radius: 9px;
+    color: #dde8c8;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.fg input:focus,
+.fg select:focus,
+.fg textarea:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.fg select option {
+    background: #1a1e14;
+}
+
+.fg-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Photo upload */
+.photo-upload-area {
+    border: 2px dashed rgba(245, 158, 11, 0.3);
+    border-radius: 12px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(245, 158, 11, 0.03);
+}
+
+.photo-upload-area:hover {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.06);
+}
+
+.photo-upload-area i {
+    font-size: 2.5rem;
+    color: rgba(245, 158, 11, 0.4);
+    display: block;
+    margin-bottom: 10px;
+}
+
+.photo-upload-area p {
+    color: #7a8a6a;
+    font-size: 0.82rem;
+}
+
+#photoPreviewImg {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    display: none;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    border: none;
+    border-radius: 10px;
+    color: #0d0f0a;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #7a8a6a;
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #f59e0b;
+}
+
+.error-msg {
+    color: #ef4444;
+    font-size: 0.78rem;
+    margin-top: 4px;
+}
+
+@media (max-width: 500px) {
+    .fg-row {
+        grid-template-columns: 1fr;
+    }
+
+    .cattle-form-body {
+        padding: 20px;
+    }
+}

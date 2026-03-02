@@ -1,0 +1,110 @@
+/* Clima page */
+.clima-page {
+    min-height: 100vh;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.clima-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.clima-card::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.clima-icon {
+    font-size: 4rem;
+    color: #60a5fa;
+    margin-bottom: 16px;
+}
+
+.clima-city {
+    font-size: 1.4rem;
+    color: #e0e0e0;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.clima-desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: capitalize;
+    margin-bottom: 24px;
+}
+
+.clima-temp {
+    font-size: 4rem;
+    color: #fff;
+    font-weight: 300;
+    margin-bottom: 24px;
+    line-height: 1;
+}
+
+.clima-temp sup {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.clima-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 24px;
+}
+
+.clima-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.clima-detail i {
+    font-size: 1.2rem;
+    color: #60a5fa;
+}
+
+.clima-detail-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+}
+
+.clima-detail-value {
+    font-size: 1rem;
+    color: #e0e0e0;
+    font-weight: 600;
+}
+
+@media (max-width: 500px) {
+    .clima-card {
+        padding: 28px 20px;
+    }
+
+    .clima-temp {
+        font-size: 3rem;
+    }
+}

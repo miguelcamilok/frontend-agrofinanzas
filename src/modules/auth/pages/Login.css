@@ -1,0 +1,276 @@
+/* ================================================
+   LOGIN — CSS
+   ================================================ */
+
+body {
+    background-color: #0b0f0c;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+}
+
+.contenido_login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+img.fondo {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.22;
+    filter: blur(4px);
+}
+
+/* ---- TARJETA ---- */
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+    transform: translateY(-4px);
+}
+
+/* ---- LOGO Y TÍTULOS ---- */
+.login-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #8ac926;
+    box-shadow: 0 0 12px rgba(138, 201, 38, 0.4);
+    margin-bottom: 12px;
+}
+
+.login-title {
+    color: #8ac926;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.login-subtitle {
+    color: #aaa;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+/* ---- ALERTAS ---- */
+.alert-error {
+    width: 100%;
+    background: rgba(231, 76, 60, 0.15);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    color: #e74c3c;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-success {
+    width: 100%;
+    background: rgba(46, 204, 113, 0.12);
+    border: 1px solid rgba(46, 204, 113, 0.35);
+    color: #2ecc71;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ---- FORMULARIO ---- */
+.login-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.field-group label {
+    color: #ccc;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.field-group label i {
+    color: #8ac926;
+    font-size: 0.8rem;
+}
+
+/* ---- INPUTS ---- */
+.field-group input {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 9px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: border 0.25s, box-shadow 0.25s;
+    box-sizing: border-box;
+}
+
+.field-group input:focus {
+    border-color: #8ac926;
+    box-shadow: 0 0 0 3px rgba(138, 201, 38, 0.2);
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.field-group input.input-error {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+}
+
+.field-error {
+    color: #e74c3c;
+    font-size: 0.78rem;
+    margin-top: 2px;
+    display: block;
+}
+
+/* ---- CONTRASEÑA ---- */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-container input {
+    padding-right: 42px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #8ac926;
+    font-size: 15px;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.toggle-password:hover {
+    color: #fff;
+}
+
+/* ---- RECORDAR ---- */
+.recordar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: #aaa;
+    font-size: 0.83rem;
+}
+
+.recordar input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: #8ac926;
+    cursor: pointer;
+}
+
+.recordar label {
+    cursor: pointer;
+}
+
+/* ---- BOTÓN ---- */
+.login-button-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.login-button {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #8ac926, #99d98c);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(138, 201, 38, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.login-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7bb222, #7cb072);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(138, 201, 38, 0.45);
+}
+
+.login-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ---- LINK REGISTRO ---- */
+.registro-link {
+    margin-top: 22px;
+    font-size: 0.85rem;
+    color: #aaa;
+    text-align: center;
+}
+
+.registro-link a {
+    color: #8ac926;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.registro-link a:hover {
+    color: #b5e254;
+    text-decoration: underline;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 500px) {
+    .login-card {
+        padding: 28px 20px;
+    }
+}
