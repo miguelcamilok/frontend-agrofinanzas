@@ -101,14 +101,18 @@ function LogModal({ deployment, onClose }: { deployment: any; onClose: () => voi
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${API_BASE}/deployments/${deployment.id}/history/logs`)
+        const controller = new AbortController();
+        fetch(`${API_BASE}/deployments/${deployment.id}/history/logs`, { signal: controller.signal })
             .then((r) => r.json())
             .then((d: any) => {
                 const entries = d.result?.data || [];
                 setLog(entries.map((e: any) => `${e.ts}  ${e.line}`).join("\n"));
             })
-            .catch(() => setLog("No se pudo cargar el log."))
+            .catch((e: any) => {
+                if (e.name !== "AbortError") setLog("No se pudo cargar el log.");
+            })
             .finally(() => setLoading(false));
+        return () => controller.abort();
     }, [deployment.id]);
 
     return (
@@ -154,13 +158,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     const [selected, setSelected] = useState<any>(null);
     const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (signal?: AbortSignal) => {
         setLoading(true);
         setError(null);
         try {
             const [projRes, depRes] = await Promise.all([
-                fetch(API_BASE),
-                fetch(`${API_BASE}/deployments?per_page=10`),
+                fetch(API_BASE, { signal }),
+                fetch(`${API_BASE}/deployments?per_page=10`, { signal }),
             ]);
             const [projData, depData] = await Promise.all([projRes.json(), depRes.json()]);
             if (!projData.success) throw new Error(projData.errors?.[0]?.message || "Error API");
@@ -168,6 +172,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             setDeployments(depData.result || []);
             setLastRefresh(new Date());
         } catch (e: any) {
+            if (e.name === "AbortError") return;
             setError(e.message || "Error desconocido");
         } finally {
             setLoading(false);
@@ -175,9 +180,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     }, []);
 
     useEffect(() => {
-        fetchData();
-        const interval = setInterval(fetchData, 60000); // auto-refresh cada 1 min
-        return () => clearInterval(interval);
+        const controller = new AbortController();
+        fetchData(controller.signal);
+        return () => controller.abort();
     }, [fetchData]);
 
     const latest = deployments[0];
@@ -207,7 +212,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                             Actualizado {timeAgo(lastRefresh.toISOString())}
                         </span>
                     )}
-                    <button style={styles.iconBtn} onClick={fetchData} title="Refrescar">
+                    <button style={styles.iconBtn} onClick={() => fetchData()} title="Refrescar">
                         ↻
                     </button>
                     <button style={styles.iconBtn} onClick={onLogout} title="Salir">
