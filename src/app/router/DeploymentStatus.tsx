@@ -44,7 +44,6 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
 
     const handleSubmit = () => {
         if (pw === STATUS_PASSWORD) {
-            sessionStorage.setItem("status_auth", "1");
             onLogin();
         } else {
             setError(true);
@@ -339,12 +338,10 @@ export default function DeploymentStatus() {
         );
     }
 
-    const [authed, setAuthed] = useState(
-        () => sessionStorage.getItem("status_auth") === "1"
-    );
+    const [authed, setAuthed] = useState(false);
 
     if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
-    return <Dashboard onLogout={() => { sessionStorage.removeItem("status_auth"); setAuthed(false); }} />;
+    return <Dashboard onLogout={() => setAuthed(false)} />;
 }
 
 // ─── Styles ────────────────────────────────
