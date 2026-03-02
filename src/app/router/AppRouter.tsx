@@ -7,6 +7,7 @@ import { AdminLayout } from '@shared/components/layout/AdminLayout'
 import { ProtectedRoute } from './ProtectedRoute'
 import { AdminProtectedRoute } from './AdminProtectedRoute'
 
+
 function LoadingFallback() {
     return (
         <div style={{
