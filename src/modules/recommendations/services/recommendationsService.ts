@@ -1,8 +1,17 @@
 import { axiosClient } from '@shared/services/api/axiosClient'
 
+// El backend (AuthController) guarda y devuelve la foto como `profile_photo`.
+// Mantenemos avatar_url como alias por compatibilidad.
+export interface CommentUser {
+    id: number
+    name: string
+    profile_photo?: string    // ← campo real del backend (AuthController / User model)
+    avatar_url?: string       // alias por si algún endpoint lo serializa distinto
+}
+
 export interface Comment {
     id: number
-    user?: { id: number; name: string; avatar_url?: string } | null
+    user?: CommentUser | null
     content: string
     category?: string
     replies?: Reply[]
@@ -14,7 +23,7 @@ export interface Comment {
 
 export interface Reply {
     id: number
-    user?: { id: number; name: string; avatar_url?: string } | null
+    user?: CommentUser | null
     content: string
     created_at: string
 }

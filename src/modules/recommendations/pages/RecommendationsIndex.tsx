@@ -7,6 +7,65 @@ import './RecommendationsIndex.css'
 
 const CATEGORIES = ['Todos', 'Recomendación', 'Opinión', 'Duda', 'Problema']
 
+// Extrae la URL de foto revisando `profile_photo` primero (campo real del backend Laravel),
+// luego `avatar_url` como fallback por compatibilidad.
+function getUserPhoto(user?: { profile_photo?: string; avatar_url?: string } | null): string | null {
+    if (!user) return null
+    return user.profile_photo || user.avatar_url || null
+}
+
+// ── Componente de avatar reutilizable ──────────────────────
+function UserAvatar({
+    user,
+    size = 'md',
+    fallbackSrc,
+}: {
+    user?: { name?: string; profile_photo?: string; avatar_url?: string } | null
+    size?: 'sm' | 'md'
+    fallbackSrc?: string
+}) {
+    const [imgError, setImgError] = useState(false)
+    const photo = getUserPhoto(user)
+    const name = user?.name || 'A'
+    const initials = name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+    const className = `comm-avatar${size === 'sm' ? ' comm-avatar--sm' : ''}`
+
+    // Resetea el error cuando cambia la URL (p.ej. el usuario actualiza su foto)
+    useEffect(() => { setImgError(false) }, [photo, fallbackSrc])
+
+    const src = photo || fallbackSrc || null
+
+    if (src && !imgError) {
+        return (
+            <img
+                src={src}
+                className={className}
+                alt={name}
+                onError={() => setImgError(true)}
+            />
+        )
+    }
+
+    // Fallback: círculo con iniciales
+    return (
+        <div
+            className={className}
+            style={{
+                background: 'var(--accent)',
+                color: '#0d0f0a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: size === 'sm' ? '0.65rem' : '0.82rem',
+            }}
+        >
+            {initials}
+        </div>
+    )
+}
+
+// ══════════════════════════════════════════════════════════
 export default function RecommendationsIndex() {
     const { user } = useAuth()
     const [comments, setComments] = useState<Comment[]>([])
@@ -60,8 +119,6 @@ export default function RecommendationsIndex() {
         } catch { /* */ }
     }
 
-    const getInitials = (name: string) => name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-
     const getTagClass = (cat: string) => {
         const c = cat.toLowerCase()
         if (c.includes('reco')) return 'comm-tag--recomendacion'
@@ -83,6 +140,7 @@ export default function RecommendationsIndex() {
     return (
         <div className="reco-container">
             <div className="comm-bg">
+
                 {/* HERO */}
                 <header className="comm-hero">
                     <div className="comm-hero__inner">
@@ -109,13 +167,20 @@ export default function RecommendationsIndex() {
                 </header>
 
                 <div className="comm-layout">
-                    {/* MAIN FEED */}
                     <main className="comm-main">
+
                         {/* COMPOSE */}
                         <div className="comm-compose">
                             <div className="comm-compose__header">
-                                <img src={user?.profile_photo || '/img/foto_perfil.jpg'} className="comm-compose__avatar" alt="Yo" />
-                                <span className="comm-compose__prompt">¿Qué hay de nuevo, {user?.name.split(' ')[0]}?</span>
+                                {/* Avatar del usuario autenticado — usa profile_photo del AuthContext */}
+                                <UserAvatar
+                                    user={user as any}
+                                    size="md"
+                                    fallbackSrc="/img/foto_perfil.jpg"
+                                />
+                                <span className="comm-compose__prompt">
+                                    ¿Qué hay de nuevo, {user?.name?.split(' ')[0]}?
+                                </span>
                             </div>
                             <div className="comm-compose__form">
                                 <textarea
@@ -141,8 +206,15 @@ export default function RecommendationsIndex() {
                                         <button className="comm-media-btn">
                                             <i className="fas fa-image"></i> Adjuntar imagen
                                         </button>
-                                        <button className="comm-submit-btn" onClick={handlePost} disabled={submitting || !newContent.trim()}>
-                                            {submitting ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-paper-plane"></i>}
+                                        <button
+                                            className="comm-submit-btn"
+                                            onClick={handlePost}
+                                            disabled={submitting || !newContent.trim()}
+                                        >
+                                            {submitting
+                                                ? <i className="fas fa-spinner fa-spin"></i>
+                                                : <i className="fas fa-paper-plane"></i>
+                                            }
                                             Publicar
                                         </button>
                                     </div>
@@ -152,7 +224,9 @@ export default function RecommendationsIndex() {
 
                         {/* FILTERS */}
                         <div className="comm-filters">
-                            <span className="comm-filters__label"><i className="fas fa-filter"></i> Filtrar por:</span>
+                            <span className="comm-filters__label">
+                                <i className="fas fa-filter"></i> Filtrar por:
+                            </span>
                             {CATEGORIES.map(cat => (
                                 <button
                                     key={cat}
@@ -168,12 +242,16 @@ export default function RecommendationsIndex() {
                         <div className="comm-feed">
                             {loading ? (
                                 <div className="comm-empty">
-                                    <div className="comm-empty__icon"><i className="fas fa-spinner fa-spin"></i></div>
+                                    <div className="comm-empty__icon">
+                                        <i className="fas fa-spinner fa-spin"></i>
+                                    </div>
                                     <h3>Cargando comunidad...</h3>
                                 </div>
                             ) : comments.length === 0 ? (
                                 <div className="comm-empty">
-                                    <div className="comm-empty__icon"><i className="fas fa-comment-slash"></i></div>
+                                    <div className="comm-empty__icon">
+                                        <i className="fas fa-comment-slash"></i>
+                                    </div>
                                     <h3>No hay publicaciones aún</h3>
                                     <p>¡Sé el primero en compartir algo con la comunidad!</p>
                                 </div>
@@ -182,15 +260,12 @@ export default function RecommendationsIndex() {
                                     <article className="comm-post" key={comment.id}>
                                         <div className="comm-post__head">
                                             <div className="comm-post__author">
-                                                {comment.user?.avatar_url ? (
-                                                    <img src={comment.user.avatar_url} className="comm-avatar" alt={comment.user.name} />
-                                                ) : (
-                                                    <div className="comm-avatar" style={{ background: 'var(--accent)', color: '#0d0f0a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                                        {getInitials(comment.user?.name || 'Anónimo')}
-                                                    </div>
-                                                )}
+                                                {/* Avatar del autor — `profile_photo` viene del backend Laravel */}
+                                                <UserAvatar user={comment.user} size="md" />
                                                 <div className="comm-post__author-info">
-                                                    <span className="comm-post__author-name">{comment.user?.name || 'Usuario Anónimo'}</span>
+                                                    <span className="comm-post__author-name">
+                                                        {comment.user?.name || 'Usuario Anónimo'}
+                                                    </span>
                                                     <span className="comm-post__date">
                                                         {formatDistanceToNow(comment.created_at)}
                                                         <span className="comm-post__date-full"> · Público</span>
@@ -203,14 +278,19 @@ export default function RecommendationsIndex() {
                                                 </span>
                                             )}
                                         </div>
+
                                         <div className="comm-post__text">
                                             {comment.content}
                                         </div>
 
                                         <div className="comm-post__foot">
                                             <div className="comm-reply-count">
-                                                <i className="fas fa-heart"
-                                                    style={{ color: comment.liked_by_user ? '#ef4444' : 'inherit', cursor: 'pointer' }}
+                                                <i
+                                                    className="fas fa-heart"
+                                                    style={{
+                                                        color: comment.liked_by_user ? '#ef4444' : 'inherit',
+                                                        cursor: 'pointer',
+                                                    }}
                                                     onClick={() => handleLike(comment.id)}
                                                 ></i>
                                                 {comment.likes_count || 0} Likes
@@ -220,18 +300,25 @@ export default function RecommendationsIndex() {
                                             </div>
                                             <button
                                                 className={`comm-reply-btn ${replyingTo === comment.id ? 'active' : ''}`}
-                                                onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                                                onClick={() => setReplyingTo(
+                                                    replyingTo === comment.id ? null : comment.id
+                                                )}
                                             >
                                                 <i className="fas fa-reply"></i>
                                                 Responder
                                             </button>
                                         </div>
 
-                                        {/* REPLIES BOX */}
+                                        {/* REPLY BOX */}
                                         {replyingTo === comment.id && (
                                             <div className="comm-reply-box">
                                                 <div className="comm-reply-box__inner">
-                                                    <img src={user?.profile_photo || '/img/foto_perfil.jpg'} className="comm-avatar comm-avatar--sm" alt="Yo" />
+                                                    {/* Avatar del usuario que responde */}
+                                                    <UserAvatar
+                                                        user={user as any}
+                                                        size="sm"
+                                                        fallbackSrc="/img/foto_perfil.jpg"
+                                                    />
                                                     <div className="comm-reply-box__fields">
                                                         <textarea
                                                             className="comm-textarea comm-textarea--sm"
@@ -258,13 +345,16 @@ export default function RecommendationsIndex() {
                                             <div className="comm-replies">
                                                 {comment.replies.map(reply => (
                                                     <div className="comm-reply" key={reply.id}>
-                                                        <div className="comm-avatar comm-avatar--sm" style={{ background: 'var(--surface)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', border: '1px solid var(--border)' }}>
-                                                            {getInitials(reply.user?.name || 'A')}
-                                                        </div>
+                                                        {/* Avatar del autor de la respuesta */}
+                                                        <UserAvatar user={reply.user} size="sm" />
                                                         <div className="comm-reply__bubble">
                                                             <div className="comm-reply__meta">
-                                                                <span className="comm-reply__name">{reply.user?.name || 'Anónimo'}</span>
-                                                                <span className="comm-reply__time">{formatDistanceToNow(reply.created_at)}</span>
+                                                                <span className="comm-reply__name">
+                                                                    {reply.user?.name || 'Anónimo'}
+                                                                </span>
+                                                                <span className="comm-reply__time">
+                                                                    {formatDistanceToNow(reply.created_at)}
+                                                                </span>
                                                             </div>
                                                             <p className="comm-reply__text">{reply.content}</p>
                                                         </div>
@@ -281,29 +371,45 @@ export default function RecommendationsIndex() {
                     {/* SIDEBAR */}
                     <aside className="comm-sidebar">
                         <div className="comm-widget">
-                            <h3 className="comm-widget__title"><i className="fas fa-list-ul"></i> Categorías</h3>
+                            <h3 className="comm-widget__title">
+                                <i className="fas fa-list-ul"></i> Categorías
+                            </h3>
                             <ul className="comm-cat-guide">
                                 <li>
                                     <span className="cat-dot cat-dot--recomendacion"></span>
-                                    <div><strong>Recomendación</strong><small>Consejos técnicos y tips.</small></div>
+                                    <div>
+                                        <strong>Recomendación</strong>
+                                        <small>Consejos técnicos y tips.</small>
+                                    </div>
                                 </li>
                                 <li>
                                     <span className="cat-dot cat-dot--opinion"></span>
-                                    <div><strong>Opinión</strong><small>Debates y puntos de vista.</small></div>
+                                    <div>
+                                        <strong>Opinión</strong>
+                                        <small>Debates y puntos de vista.</small>
+                                    </div>
                                 </li>
                                 <li>
                                     <span className="cat-dot cat-dot--duda"></span>
-                                    <div><strong>Duda</strong><small>Preguntas a la comunidad.</small></div>
+                                    <div>
+                                        <strong>Duda</strong>
+                                        <small>Preguntas a la comunidad.</small>
+                                    </div>
                                 </li>
                                 <li>
                                     <span className="cat-dot cat-dot--problema"></span>
-                                    <div><strong>Problema</strong><small>Alertas o dificultades.</small></div>
+                                    <div>
+                                        <strong>Problema</strong>
+                                        <small>Alertas o dificultades.</small>
+                                    </div>
                                 </li>
                             </ul>
                         </div>
 
                         <div className="comm-widget">
-                            <h3 className="comm-widget__title"><i className="fas fa-shield-halved"></i> Normas</h3>
+                            <h3 className="comm-widget__title">
+                                <i className="fas fa-shield-halved"></i> Normas
+                            </h3>
                             <ul className="comm-tips">
                                 <li><i className="fas fa-check"></i> Sé respetuoso con todos.</li>
                                 <li><i className="fas fa-check"></i> Comparte info verídica.</li>
