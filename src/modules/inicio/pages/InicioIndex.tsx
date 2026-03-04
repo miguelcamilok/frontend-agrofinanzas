@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { inicioService } from '../services/inicioService'
+import { inicioService, type PrecioItem, type PreciosResponse } from '../services/inicioService'
 import './InicioIndex.css'
 
 /* ═══ CATEGORIES DATA ═══ */
@@ -30,10 +30,55 @@ const CATS = [
 ]
 
 const GM: Record<string, { color: string; bg: string; border: string }> = {
-    'Economía': { color: '#f4c430', bg: 'rgba(244,196,48,.08)', border: 'rgba(244,196,48,.25)' },
-    'Comercio': { color: '#60a5fa', bg: 'rgba(96,165,250,.08)', border: 'rgba(96,165,250,.25)' },
-    'Producción': { color: '#8ac926', bg: 'rgba(138,201,38,.08)', border: 'rgba(138,201,38,.25)' },
-    'Sanidad': { color: '#fb7185', bg: 'rgba(251,113,133,.08)', border: 'rgba(251,113,133,.25)' },
+    'Economía':  { color: '#f4c430', bg: 'rgba(244,196,48,.08)',  border: 'rgba(244,196,48,.25)'  },
+    'Comercio':  { color: '#60a5fa', bg: 'rgba(96,165,250,.08)',  border: 'rgba(96,165,250,.25)'  },
+    'Producción':{ color: '#8ac926', bg: 'rgba(138,201,38,.08)', border: 'rgba(138,201,38,.25)'  },
+    'Sanidad':   { color: '#fb7185', bg: 'rgba(251,113,133,.08)',border: 'rgba(251,113,133,.25)' },
+}
+
+/* ── Metadatos visuales por producto ── */
+const PRECIO_META: Record<string, {
+    icon: string
+    bandColor: string    // banda superior de la tarjeta
+    iconBg: string       // fondo del icono
+    iconColor: string    // color del icono
+}> = {
+    cafe: {
+        icon: 'fa-mug-hot',
+        bandColor: 'linear-gradient(90deg, #6f3d1e, #c8813a)',
+        iconBg:    'linear-gradient(135deg, #7c4a22, #b56b2c)',
+        iconColor: '#fde4b8',
+    },
+    maiz: {
+        icon: 'fa-seedling',
+        bandColor: 'linear-gradient(90deg, #d4900a, #f5c842)',
+        iconBg:    'linear-gradient(135deg, #c47e08, #e8b020)',
+        iconColor: '#fff8e1',
+    },
+    leche: {
+        icon: 'fa-droplet',
+        bandColor: 'linear-gradient(90deg, #3b82f6, #93c5fd)',
+        iconBg:    'linear-gradient(135deg, #2563eb, #60a5fa)',
+        iconColor: '#e0f2fe',
+    },
+    pollo: {
+        icon: 'fa-drumstick-bite',
+        bandColor: 'linear-gradient(90deg, #c2410c, #fb923c)',
+        iconBg:    'linear-gradient(135deg, #b45309, #f97316)',
+        iconColor: '#ffedd5',
+    },
+    papa: {
+        icon: 'fa-circle',
+        bandColor: 'linear-gradient(90deg, #78350f, #b07d3c)',
+        iconBg:    'linear-gradient(135deg, #92400e, #a36c2a)',
+        iconColor: '#fef3c7',
+    },
+    carne: {
+        icon: 'fa-cow',
+        bandColor: 'linear-gradient(90deg, #991b1b, #f87171)',
+        iconBg:    'linear-gradient(135deg, #7f1d1d, #dc2626)',
+        iconColor: '#ffe4e6',
+    },
 }
 
 const slides = [
@@ -54,38 +99,267 @@ const newsCards = [
     { img: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&q=80&w=600', tag: 'Maquinaria', title: 'Mantenimiento de Maquinaria', desc: 'Consejos esenciales para el mantenimiento preventivo de tractores y equipos agrícolas.' },
 ]
 
+/* ── Helpers ── */
+function formatCOP(n: number): string {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0,
+    }).format(n)
+}
+
+function VariacionBadge({ v }: { v: number | null }) {
+    if (v === null || v === undefined) {
+        return <span className="precio-var neutral">Sin datos</span>
+    }
+    const up = v > 0
+    const eq = v === 0
+    return (
+        <span className={`precio-var ${eq ? 'neutral' : up ? 'up' : 'down'}`}>
+            {!eq && <i className={`fa-solid fa-arrow-trend-${up ? 'up' : 'down'}`}></i>}
+            {eq ? 'Sin variación' : `${up ? '+' : ''}${v.toFixed(1)}%`}
+        </span>
+    )
+}
+
+/* ══ PRECIO CARD ══ */
+function PrecioCard({ id, item }: { id: string; item: PrecioItem }) {
+    const meta = PRECIO_META[id] ?? PRECIO_META['maiz']
+    const isCafe = id === 'cafe'
+
+    return (
+        <div className="precio-card">
+            {/* Banda de color superior */}
+            <div
+                className="precio-card-band"
+                style={{ background: meta.bandColor }}
+            />
+
+            <div className="precio-card-body">
+                {/* Header */}
+                <div className="precio-card-header">
+                    <div
+                        className="precio-icon-wrap"
+                        style={{ background: meta.iconBg }}
+                    >
+                        <i
+                            className={`fa-solid ${meta.icon}`}
+                            style={{ color: meta.iconColor }}
+                        ></i>
+                    </div>
+
+                    <div className="precio-title-group">
+                        <h3 className="precio-nombre">{item.nombre}</h3>
+                        <span className="precio-unidad">{item.unidad}</span>
+                    </div>
+
+                    {item.en_vivo && (
+                        <span className="precio-live-badge">
+                            <span className="live-dot"></span> En vivo
+                        </span>
+                    )}
+                </div>
+
+                {/* Precio + variación */}
+                <div className="precio-main-value">
+                    <span className="precio-amount">{formatCOP(item.precio)}</span>
+                    <VariacionBadge v={item.variacion} />
+                </div>
+
+                {/* Datos extra café */}
+                {isCafe && item.precio_carga && (
+                    <div className="precio-extra-row">
+                        <div className="precio-extra-item">
+                            <span className="precio-extra-label">Carga 125 kg</span>
+                            <span className="precio-extra-val">{formatCOP(item.precio_carga)}</span>
+                        </div>
+                        {item.bolsa_ny != null && (
+                            <div className="precio-extra-item">
+                                <span className="precio-extra-label">Bolsa NY</span>
+                                <span className="precio-extra-val">{item.bolsa_ny} ¢/lb</span>
+                            </div>
+                        )}
+                        {item.tasa_cambio != null && (
+                            <div className="precio-extra-item">
+                                <span className="precio-extra-label">TRM</span>
+                                <span className="precio-extra-val">{formatCOP(item.tasa_cambio)}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Fuente */}
+                <div className="precio-footer">
+                    <i className="fa-solid fa-circle-info"></i>
+                    <span>{item.fuente}</span>
+                    {item.fuente_url && (
+                        <a
+                            href={`https://${item.fuente_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="precio-fuente-link"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <i className="fa-solid fa-arrow-up-right-from-square"></i> Ver fuente
+                        </a>
+                    )}
+                </div>
+
+                <div className="precio-fecha">
+                    <i className="fa-regular fa-calendar"></i> {item.fecha}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ══ PRECIOS SECTION ══ */
+function PreciosSection() {
+    const [precios, setPrecios] = useState<PreciosResponse | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+
+    const fetchPrecios = useCallback(async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            const data = await inicioService.getPrecios()
+            setPrecios(data)
+            setLastUpdated(data.actualizado)
+        } catch {
+            setError('No se pudieron cargar los precios. Verifica tu conexión e intenta de nuevo.')
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    useEffect(() => { fetchPrecios() }, [fetchPrecios])
+
+    const precioEntries = precios
+        ? (Object.entries(precios.precios) as [string, PrecioItem][])
+        : []
+
+    // Colores de banda para skeleton
+    const skeletonBands = [
+        'linear-gradient(90deg,#6f3d1e,#c8813a)',
+        'linear-gradient(90deg,#d4900a,#f5c842)',
+        'linear-gradient(90deg,#3b82f6,#93c5fd)',
+        'linear-gradient(90deg,#c2410c,#fb923c)',
+        'linear-gradient(90deg,#78350f,#b07d3c)',
+        'linear-gradient(90deg,#991b1b,#f87171)',
+    ]
+
+    return (
+        <section className="precios-section">
+            <div className="precios-inner">
+                {/* Header */}
+                <div className="precios-header">
+                    <div className="precios-title-group">
+                        <div className="precios-supertag">Mercado Agropecuario Colombiano</div>
+                        <h2>Precios de <em>Referencia</em></h2>
+                        <p className="precios-subtitle">
+                            Consulta los precios actualizados del sector. El café se obtiene en
+                            tiempo real desde la Federación Nacional de Cafeteros; los demás
+                            productos provienen de SIPSA‑DANE, MADR y gremios sectoriales.
+                        </p>
+                    </div>
+                    <div className="precios-controls">
+                        {lastUpdated && (
+                            <span className="precios-updated">
+                                <i className="fa-regular fa-clock"></i>
+                                Actualizado: {lastUpdated}
+                            </span>
+                        )}
+                        <button
+                            className="precios-refresh-btn"
+                            onClick={fetchPrecios}
+                            disabled={loading}
+                            title="Actualizar precios"
+                        >
+                            <i className={`fa-solid fa-rotate${loading ? ' fa-spin' : ''}`}></i>
+                            {loading ? 'Cargando...' : 'Actualizar precios'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Error */}
+                {error && (
+                    <div className="precios-error">
+                        <i className="fa-solid fa-triangle-exclamation"></i>
+                        <span>{error}</span>
+                        <button onClick={fetchPrecios}>Reintentar</button>
+                    </div>
+                )}
+
+                {/* Skeleton */}
+                {loading && !precios && (
+                    <div className="precios-skeleton-grid">
+                        {skeletonBands.map((band, i) => (
+                            <div className="precio-skeleton" key={i}>
+                                <div className="skel-band" style={{ background: band }} />
+                                <div className="skel-body">
+                                    <div className="skel skel-header"></div>
+                                    <div className="skel skel-value"></div>
+                                    <div className="skel skel-footer"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Grid de precios */}
+                {precios && (
+                    <div className="precios-grid">
+                        {precioEntries.map(([id, item]) => (
+                            <PrecioCard key={id} id={id} item={item} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Disclaimer */}
+                <div className="precios-disclaimer">
+                    <i className="fa-solid fa-shield-halved"></i>
+                    Los precios son de referencia informativa. Para operaciones comerciales,
+                    consulte directamente con los gremios y fuentes oficiales.
+                    El servidor renueva la caché cada 6 horas.
+                </div>
+            </div>
+        </section>
+    )
+}
+
+/* ══ MAIN COMPONENT ══ */
 export default function InicioIndex() {
     const [curSlide, setCurSlide] = useState(0)
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const [revealed, setRevealed] = useState<Set<number>>(new Set())
-
-    /* Modal */
     const [modal, setModal] = useState<{ title: string; desc: string; img: string; tag: string } | null>(null)
-
-    /* Weather */
     const [weatherOpen, setWeatherOpen] = useState(false)
     const [weather, setWeather] = useState<{ temp: string; humidity: string; wind: string; desc: string }>({ temp: '--', humidity: '--', wind: '--', desc: '--' })
     const [weatherIcon, setWeatherIcon] = useState('fa-cloud-sun')
-
-    /* Search */
     const [searchQuery, setSearchQuery] = useState('')
     const [showGrid, setShowGrid] = useState(false)
     const [activeChip, setActiveChip] = useState('')
 
-    /* Carousel */
     const resetTimer = useCallback(() => {
         if (timerRef.current) clearInterval(timerRef.current)
         timerRef.current = setInterval(() => setCurSlide(p => (p + 1) % slides.length), 5500)
     }, [])
 
-    useEffect(() => { resetTimer(); return () => { if (timerRef.current) clearInterval(timerRef.current) } }, [resetTimer])
+    useEffect(() => {
+        resetTimer()
+        return () => { if (timerRef.current) clearInterval(timerRef.current) }
+    }, [resetTimer])
 
     const goSlide = (n: number) => { setCurSlide((n + slides.length) % slides.length); resetTimer() }
 
-    /* Scroll reveal */
     useEffect(() => {
         const els = document.querySelectorAll('.reveal')
-        if (!('IntersectionObserver' in window)) { els.forEach((_, i) => setRevealed(p => new Set(p).add(i))); return }
+        if (!('IntersectionObserver' in window)) {
+            els.forEach((_, i) => setRevealed(p => new Set(p).add(i)))
+            return
+        }
         const obs = new IntersectionObserver((entries) => {
             entries.forEach(e => {
                 if (e.isIntersecting) {
@@ -99,7 +373,6 @@ export default function InicioIndex() {
         return () => obs.disconnect()
     }, [])
 
-    /* Weather */
     const fetchWeather = () => {
         setWeatherOpen(p => !p)
         inicioService.getClima().then(d => {
@@ -117,7 +390,6 @@ export default function InicioIndex() {
         }).catch(() => setWeather({ temp: 'Error', humidity: '--', wind: '--', desc: 'Error al obtener clima' }))
     }
 
-    /* Search filter */
     const filteredCats = searchQuery.trim()
         ? CATS.filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.group.toLowerCase().includes(searchQuery.toLowerCase()))
         : CATS
@@ -130,7 +402,7 @@ export default function InicioIndex() {
 
     return (
         <div className="inicio-page">
-            {/* ══ HERO + CAROUSEL ══ */}
+            {/* ══ HERO ══ */}
             <div className="hero-principal">
                 <div className="carrusel-track">
                     {slides.map((s, i) => (
@@ -164,7 +436,9 @@ export default function InicioIndex() {
             {/* BANNER TICKER */}
             <div className={`noticias-banner reveal ${revealed.has(0) ? 'revealed' : ''}`}>
                 <div className="banner-inner">
-                    <div className="banner-badge"><i className="fa-solid fa-circle" style={{ fontSize: '.42rem', color: 'var(--green)' }}></i> En vivo</div>
+                    <div className="banner-badge">
+                        <i className="fa-solid fa-circle" style={{ fontSize: '.42rem', color: 'var(--green)' }}></i> En vivo
+                    </div>
                     <div className="ticker-wrap">
                         <div className="ticker">
                             <span>Café: +3.2% &nbsp;·&nbsp; Maíz: -1.4% &nbsp;·&nbsp; Leche: sin variación &nbsp;·&nbsp; Pollo: +0.8% &nbsp;·&nbsp; Nuevos subsidios FINAGRO &nbsp;·&nbsp; Alerta seca: Boyacá y Cundinamarca &nbsp;·&nbsp; Café: +3.2% &nbsp;·&nbsp; Maíz: -1.4% &nbsp;·&nbsp;</span>
@@ -173,7 +447,10 @@ export default function InicioIndex() {
                 </div>
             </div>
 
-            {/* NOTICIAS */}
+            {/* ══ PRECIOS EN VIVO ══ */}
+            <PreciosSection />
+
+            {/* ══ NOTICIAS ══ */}
             <section className="noticias-section">
                 <div className={`section-header reveal ${revealed.has(1) ? 'revealed' : ''}`}>
                     <span className="section-tag">Artículos</span>
@@ -196,7 +473,7 @@ export default function InicioIndex() {
                 </div>
             </section>
 
-            {/* AMIGO GANADERO */}
+            {/* ══ AMIGO GANADERO ══ */}
             <section className="ganadero-section" id="amigo-ganadero">
                 <div className="ganadero-layout">
                     <div className="ganadero-intro">
@@ -253,7 +530,6 @@ export default function InicioIndex() {
                     </div>
                 </div>
 
-                {/* Grid or search results */}
                 {showGrid && !searchQuery && (
                     <div className="ganadero-grid" style={{ display: 'grid' }}>
                         {Object.entries(groupedCats).map(([group, cats]) => {

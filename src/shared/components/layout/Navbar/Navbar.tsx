@@ -244,7 +244,7 @@ export function Navbar() {
                                     <div className="af-submenu-divider"></div>
                                     <div className="af-submenu-section">
                                         <div className="af-submenu-label">Ganadería</div>
-                                        <Link to="/client/hato/hato" className="af-submenu-item"><i className="fas fa-cow" style={{ color: '#f59e0b' }}></i> Mi Hato Ganadero</Link>
+                                        <Link to="/client/hato/hato" className="af-submenu-item"><i className="fas fa-cow" style={{ color: '#f59e0b' }}></i> Módulo de Ganadería</Link>
                                     </div>
                                     <div className="af-submenu-divider"></div>
                                     <Link to="/client/finances" className="af-submenu-item-highlight">

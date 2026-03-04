@@ -24,6 +24,28 @@ export const clientService = {
         }>('/client/finances', { params: { filter } })
         return data
     },
+
+    /**
+     * Requests the backend to generate and return a PDF of the financial history.
+     * Returns a Blob which the caller can turn into a download link.
+     *
+     * Backend route: POST /api/client/finances/export-pdf
+     * Expects JSON body: { filter, date_from, date_to }
+     * Returns: application/pdf
+     */
+    async exportFinancesPDF(payload: {
+        filter?: string
+        date_from?: string
+        date_to?: string
+    }): Promise<Blob> {
+        const response = await axiosClient.post(
+            '/client/finances/export-pdf',
+            payload,
+            { responseType: 'blob' }
+        )
+        return response.data as Blob
+    },
+
     async createIncome(payload: { amount: number; date: string; description?: string }) {
         const { data } = await axiosClient.post<{ success: boolean; message?: string }>('/client/income', payload)
         return data
