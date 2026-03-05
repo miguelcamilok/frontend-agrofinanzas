@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@shared/context/AuthContext'
 import { axiosClient } from '@shared/services/api/axiosClient'
 import './EditProfile.css'
@@ -24,7 +25,8 @@ interface Particle {
 }
 
 export default function EditProfile() {
-    const { user, updateUser } = useAuth()
+    const { user, updateUser, logout } = useAuth()
+    const navigate = useNavigate()
 
     // ── Form states ──
     const [name, setName] = useState('')
@@ -37,7 +39,6 @@ export default function EditProfile() {
     const [photoPreview, setPhotoPreview] = useState(user?.profile_photo || '/img/foto_perfil.jpg')
     const [submitting, setSubmitting] = useState(false)
 
-    // Pre-populate fields
     useEffect(() => {
         if (user) {
             setName(user.name || '')
@@ -50,23 +51,20 @@ export default function EditProfile() {
         }
     }, [user])
 
-    // Alerts
     const [successMsg, setSuccessMsg] = useState('')
     const [errorMsg, setErrorMsg] = useState('')
-
-    // Tips
     const [activeTip, setActiveTip] = useState('name')
 
-    // Delete account
+    // ── Delete account states ──
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const [deleteCodeSent, setDeleteCodeSent] = useState(false)
     const [deleteDigits, setDeleteDigits] = useState(['', '', '', '', '', ''])
     const [deleteSending, setDeleteSending] = useState(false)
     const deleteDigitRefs = useRef<(HTMLInputElement | null)[]>([])
 
-    // Canvas
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
-    // ... (canvas effect same)
+    // ── Canvas particles ──
     useEffect(() => {
         const canvas = canvasRef.current
         if (!canvas) return
@@ -109,7 +107,7 @@ export default function EditProfile() {
         return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
     }, [])
 
-    // ── Photo preview ──
+    // ── Photo ──
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
@@ -118,7 +116,7 @@ export default function EditProfile() {
         setPhotoPreview(URL.createObjectURL(file))
     }
 
-    // ── Submit ──
+    // ── Submit perfil ──
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!user) return
@@ -134,15 +132,15 @@ export default function EditProfile() {
         if (photoFile) formData.append('profile_photo', photoFile)
 
         try {
-            // Updated endpoint to match: Route::post('/users/{id}/update-profile', ...)
             const { data } = await axiosClient.post(`/users/${user.id}/update-profile`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             })
             if (data.success) {
                 setSuccessMsg(data.message || 'Perfil actualizado correctamente.')
                 if (data.user) updateUser(data.user)
+            } else {
+                setErrorMsg(data.message || 'No se pudo actualizar el perfil.')
             }
-            else setErrorMsg(data.message || 'No se pudo actualizar el perfil.')
         } catch {
             setErrorMsg('Error de conexión o datos inválidos.')
         } finally {
@@ -150,14 +148,21 @@ export default function EditProfile() {
         }
     }
 
-    // ── Delete account: request code ──
-    const handleDeleteRequest = async () => {
+    // ── Delete: abrir modal de confirmación ──
+    const handleDeleteRequest = () => {
+        setConfirmDeleteOpen(true)
+    }
+
+    // ── Delete: confirmar en modal → enviar código por correo ──
+    const handleDeleteRequestConfirmed = async () => {
         if (!user) return
-        if (!confirm('¿Deseas recibir un código de confirmación para eliminar tu cuenta?')) return
+        setConfirmDeleteOpen(false)
         setDeleteSending(true)
+        setErrorMsg('')
         try {
             await axiosClient.post(`/users/${user.id}/send-delete-code`)
             setDeleteCodeSent(true)
+            setTimeout(() => deleteDigitRefs.current[0]?.focus(), 300)
         } catch {
             setErrorMsg('No se pudo enviar el código.')
         } finally {
@@ -165,7 +170,7 @@ export default function EditProfile() {
         }
     }
 
-    // ── Delete digit input handlers ──
+    // ── Delete digit handlers ──
     const handleDeleteDigitInput = (index: number, value: string) => {
         const clean = value.replace(/[^0-9]/g, '').slice(-1)
         const newDigits = [...deleteDigits]
@@ -180,25 +185,37 @@ export default function EditProfile() {
         }
     }
 
+    const handleDeleteDigitPaste = (e: React.ClipboardEvent) => {
+        e.preventDefault()
+        const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '')
+        if (pasted.length === 6) {
+            setDeleteDigits(pasted.split(''))
+            deleteDigitRefs.current[5]?.focus()
+        }
+    }
+
     const allDeleteFilled = deleteDigits.every(d => d !== '')
 
-    // ── Confirm delete ──
+    // ── Delete: confirmar con código ──
     const handleDeleteConfirm = useCallback(async () => {
         if (!user) return
         const code = deleteDigits.join('')
         try {
-            // Updated endpoint: Route::delete('/users/{id}', ...)
-            await axiosClient.delete(`/users/${user.id}`, { data: { code: code } })
-            window.location.href = '/'
+            await axiosClient.delete(`/users/${user.id}`, { data: { code } })
+            logout()
+            navigate('/')
         } catch {
             setErrorMsg('Código incorrecto o error al eliminar.')
         }
-    }, [deleteDigits, user])
+    }, [deleteDigits, user, logout, navigate])
 
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() - 1)
 
-    const genderLabel = user?.gender === 'male' ? 'Masculino' : user?.gender === 'female' ? 'Femenino' : user?.gender === 'other' ? 'Otro' : 'Sin cambiar...'
+    const genderLabel = user?.gender === 'male' ? 'Masculino'
+        : user?.gender === 'female' ? 'Femenino'
+        : user?.gender === 'other' ? 'Otro'
+        : 'Sin cambiar...'
 
     return (
         <>
@@ -214,7 +231,7 @@ export default function EditProfile() {
                     </div>
                     <ul className="tips-list">
                         {TIPS.map(tip => (
-                            <li key={tip.field} className={`tip-item ${activeTip === tip.field ? 'active' : ''}`} data-field={tip.field}>
+                            <li key={tip.field} className={`tip-item ${activeTip === tip.field ? 'active' : ''}`}>
                                 <div className="tip-icon"><i className={`fas ${tip.icon}`}></i></div>
                                 <div className="tip-content"><strong>{tip.title}</strong><p>{tip.desc}</p></div>
                             </li>
@@ -235,7 +252,7 @@ export default function EditProfile() {
                         {errorMsg && <div className="alert-error"><i className="fas fa-circle-exclamation"></i> {errorMsg}</div>}
 
                         <form onSubmit={handleSubmit}>
-                            {/* Photo */}
+                            {/* Foto */}
                             <div className="profile-photo-container">
                                 <div className="profile-photo-circle">
                                     <img id="imgPreview" src={photoPreview} alt="Foto de perfil" />
@@ -248,29 +265,29 @@ export default function EditProfile() {
                             <p className="photo-hint">Haz clic en la foto para cambiarla · JPG, PNG · Máx 2MB</p>
 
                             <div className="field-group" onFocus={() => setActiveTip('name')}>
-                                <label htmlFor="name"><i className="fas fa-user"></i> Nombre completo <span className="optional">(opcional)</span></label>
-                                <input type="text" id="name" placeholder={user?.name || ''} value={name} onChange={e => setName(e.target.value)} />
+                                <label><i className="fas fa-user"></i> Nombre completo <span className="optional">(opcional)</span></label>
+                                <input type="text" placeholder={user?.name || ''} value={name} onChange={e => setName(e.target.value)} />
                             </div>
 
                             <div className="field-group" onFocus={() => setActiveTip('email')}>
-                                <label htmlFor="email"><i className="fas fa-envelope"></i> Correo electrónico <span className="optional">(opcional)</span></label>
-                                <input type="email" id="email" placeholder={user?.email || ''} value={email} onChange={e => setEmail(e.target.value)} />
+                                <label><i className="fas fa-envelope"></i> Correo electrónico <span className="optional">(opcional)</span></label>
+                                <input type="email" placeholder={user?.email || ''} value={email} onChange={e => setEmail(e.target.value)} />
                             </div>
 
                             <div className="field-group" onFocus={() => setActiveTip('phone')}>
-                                <label htmlFor="phone"><i className="fas fa-phone"></i> Teléfono <span className="optional">(opcional)</span></label>
-                                <input type="tel" id="phone" placeholder={user?.phone || '300 123 4567'} value={phone} onChange={e => setPhone(e.target.value)} />
+                                <label><i className="fas fa-phone"></i> Teléfono <span className="optional">(opcional)</span></label>
+                                <input type="tel" placeholder={user?.phone || '300 123 4567'} value={phone} onChange={e => setPhone(e.target.value)} />
                             </div>
 
                             <div className="field-group" onFocus={() => setActiveTip('birth_date')}>
-                                <label htmlFor="birth_date"><i className="fas fa-calendar"></i> Fecha de nacimiento <span className="optional">(opcional)</span></label>
-                                <input type="date" id="birth_date" value={birthDate} onChange={e => setBirthDate(e.target.value)} max={maxDate.toISOString().split('T')[0]} />
+                                <label><i className="fas fa-calendar"></i> Fecha de nacimiento <span className="optional">(opcional)</span></label>
+                                <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} max={maxDate.toISOString().split('T')[0]} />
                             </div>
 
                             <div className="field-row">
                                 <div className="field-group" onFocus={() => setActiveTip('gender')}>
-                                    <label htmlFor="gender"><i className="fas fa-venus-mars"></i> Género <span className="optional">(opcional)</span></label>
-                                    <select id="gender" className="field-select" value={gender} onChange={e => setGender(e.target.value)}>
+                                    <label><i className="fas fa-venus-mars"></i> Género <span className="optional">(opcional)</span></label>
+                                    <select className="field-select" value={gender} onChange={e => setGender(e.target.value)}>
                                         <option value="">{genderLabel}</option>
                                         <option value="male">Masculino</option>
                                         <option value="female">Femenino</option>
@@ -278,13 +295,16 @@ export default function EditProfile() {
                                     </select>
                                 </div>
                                 <div className="field-group" onFocus={() => setActiveTip('experience_years')}>
-                                    <label htmlFor="experience_years"><i className="fas fa-seedling"></i> Años en el campo <span className="optional">(opcional)</span></label>
-                                    <input type="number" id="experience_years" placeholder={String(user?.experience_years ?? 'Ej: 5')} min={0} max={70} value={experience} onChange={e => setExperience(e.target.value)} />
+                                    <label><i className="fas fa-seedling"></i> Años en el campo <span className="optional">(opcional)</span></label>
+                                    <input type="number" placeholder={String(user?.experience_years ?? 'Ej: 5')} min={0} max={70} value={experience} onChange={e => setExperience(e.target.value)} />
                                 </div>
                             </div>
 
                             <button type="submit" className="submit-btn" disabled={submitting}>
-                                {submitting ? <><i className="fas fa-spinner fa-spin"></i> Guardando...</> : <><i className="fas fa-floppy-disk"></i> Guardar Cambios</>}
+                                {submitting
+                                    ? <><i className="fas fa-spinner fa-spin"></i> Guardando...</>
+                                    : <><i className="fas fa-floppy-disk"></i> Guardar Cambios</>
+                                }
                             </button>
                         </form>
 
@@ -302,12 +322,18 @@ export default function EditProfile() {
                                         Tus comentarios en la comunidad quedarán como anónimos.
                                     </p>
                                     <button className="delete-btn" onClick={handleDeleteRequest} disabled={deleteSending}>
-                                        <i className="fas fa-trash"></i> Eliminar mi cuenta
+                                        {deleteSending
+                                            ? <><i className="fas fa-spinner fa-spin"></i> Enviando código...</>
+                                            : <><i className="fas fa-trash"></i> Eliminar mi cuenta</>
+                                        }
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    <p className="danger-desc">Ingresa el código de 6 dígitos que enviamos a tu correo para confirmar la eliminación.</p>
+                                    <p className="danger-desc">
+                                        Ingresa el código de 6 dígitos enviado a{' '}
+                                        <strong style={{ color: 'rgba(255,255,255,0.6)' }}>{user?.email}</strong>
+                                    </p>
                                     <div className="delete-code-inputs">
                                         {deleteDigits.map((digit, i) => (
                                             <input
@@ -316,19 +342,29 @@ export default function EditProfile() {
                                                 className="delete-digit"
                                                 maxLength={1}
                                                 inputMode="numeric"
+                                                autoComplete="off"
                                                 value={digit}
                                                 ref={el => { deleteDigitRefs.current[i] = el }}
                                                 onChange={e => handleDeleteDigitInput(i, e.target.value)}
                                                 onKeyDown={e => handleDeleteDigitKeyDown(i, e)}
+                                                onPaste={i === 0 ? handleDeleteDigitPaste : undefined}
                                                 onKeyPress={e => { if (!/[0-9]/.test(e.key)) e.preventDefault() }}
                                             />
                                         ))}
                                     </div>
                                     <div className="delete-actions">
-                                        <button className="delete-btn-confirm" disabled={!allDeleteFilled} onClick={handleDeleteConfirm}>
+                                        <button
+                                            className="delete-btn-confirm"
+                                            disabled={!allDeleteFilled}
+                                            onClick={handleDeleteConfirm}
+                                        >
                                             <i className="fas fa-trash"></i> Confirmar eliminación
                                         </button>
-                                        <button className="resend-delete-btn" onClick={handleDeleteRequest}>
+                                        <button
+                                            className="resend-delete-btn"
+                                            onClick={handleDeleteRequestConfirmed}
+                                            disabled={deleteSending}
+                                        >
                                             <i className="fas fa-rotate-right"></i> Reenviar código
                                         </button>
                                     </div>
@@ -338,6 +374,75 @@ export default function EditProfile() {
 
                     </div>
                 </main>
+            </div>
+
+            {/* ══ MODAL CONFIRMAR ELIMINACIÓN ══ */}
+            <div
+                className={`verify-modal-overlay ${confirmDeleteOpen ? 'open' : ''}`}
+                onClick={e => { if (e.target === e.currentTarget) setConfirmDeleteOpen(false) }}
+            >
+                <div className="verify-modal" style={{ borderColor: 'rgba(231,76,60,0.3)' }}>
+                    <button className="verify-modal-close" onClick={() => setConfirmDeleteOpen(false)}>
+                        <i className="fas fa-times"></i>
+                    </button>
+
+                    <div className="verify-modal-icon" style={{
+                        background: 'rgba(231,76,60,0.08)',
+                        borderColor: 'rgba(231,76,60,0.3)',
+                        color: '#e74c3c',
+                        animation: 'none'
+                    }}>
+                        <i className="fas fa-triangle-exclamation"></i>
+                    </div>
+
+                    <h2 className="verify-modal-title" style={{ color: '#e74c3c' }}>
+                        ¿Eliminar cuenta?
+                    </h2>
+                    <p className="verify-modal-sub">
+                        Esta acción es{' '}
+                        <strong style={{ color: 'rgba(255,255,255,0.75)' }}>irreversible</strong>.<br />
+                        Se eliminarán todos tus datos financieros,<br />
+                        ganado y registros permanentemente.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                        <button
+                            className="verify-modal-btn"
+                            onClick={handleDeleteRequestConfirmed}
+                            disabled={deleteSending}
+                            style={{
+                                background: 'linear-gradient(135deg, #c0392b, #e74c3c)',
+                                marginBottom: 0,
+                                color: '#fff'
+                            }}
+                        >
+                            {deleteSending
+                                ? <><i className="fas fa-spinner fa-spin"></i> Enviando código...</>
+                                : <><i className="fas fa-trash"></i> Sí, eliminar mi cuenta</>
+                            }
+                        </button>
+                        <button
+                            onClick={() => setConfirmDeleteOpen(false)}
+                            style={{
+                                width: '100%',
+                                padding: '11px',
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px',
+                                color: 'rgba(255,255,255,0.4)',
+                                fontSize: '0.82rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: 'Montserrat, sans-serif',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)')}
+                            onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
             </div>
         </>
     )
