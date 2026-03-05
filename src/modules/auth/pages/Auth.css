@@ -882,3 +882,31 @@
         gap: 7px;
     }
 }
+/* ── EXTRAS LOGIN ── */
+.login-extras {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.login-extras .recordar {
+    margin-bottom: 0;
+}
+
+.forgot-link {
+    background: none;
+    border: none;
+    color: rgba(138, 201, 38, 0.6);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.forgot-link:hover {
+    color: #8ac926;
+}

@@ -22,7 +22,6 @@ export default function Auth() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    // ── Form state ──
     const isRegisterRoute = location.pathname === '/register'
     const [isRegister, setIsRegister] = useState(isRegisterRoute)
     const [flipHeight, setFlipHeight] = useState<string>('auto')
@@ -66,11 +65,31 @@ export default function Auth() {
     const [verifyTimeLeft, setVerifyTimeLeft] = useState(900)
     const [resendDisabled, setResendDisabled] = useState(false)
 
+    // ── Forgot password modal ──
+    const [forgotOpen, setForgotOpen] = useState(false)
+    // step: 'email' → pide correo | 'code' → pide código + nueva contraseña
+    const [forgotStep, setForgotStep] = useState<'email' | 'code'>('email')
+    const [forgotEmail, setForgotEmail] = useState('')
+    const [forgotUserId, setForgotUserId] = useState<number>(0)
+    const [forgotUserEmail, setForgotUserEmail] = useState('')
+    const [forgotDigits, setForgotDigits] = useState<string[]>(['', '', '', '', '', ''])
+    const [forgotNewPass, setForgotNewPass] = useState('')
+    const [forgotNewPassConfirm, setForgotNewPassConfirm] = useState('')
+    const [forgotNewPassVisible, setForgotNewPassVisible] = useState(false)
+    const [forgotNewPassConfirmVisible, setForgotNewPassConfirmVisible] = useState(false)
+    const [forgotSubmitting, setForgotSubmitting] = useState(false)
+    const [forgotAlert, setForgotAlert] = useState<{ type: 'error' | 'success'; msg: string } | null>(null)
+    const [forgotTimeLeft, setForgotTimeLeft] = useState(900)
+    const [forgotResendDisabled, setForgotResendDisabled] = useState(false)
+    const [forgotMatchError, setForgotMatchError] = useState(false)
+
     const flipRef = useRef<HTMLDivElement>(null)
     const frontRef = useRef<HTMLDivElement>(null)
     const backRef = useRef<HTMLDivElement>(null)
     const digitRefs = useRef<(HTMLInputElement | null)[]>([])
+    const forgotDigitRefs = useRef<(HTMLInputElement | null)[]>([])
     const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const forgotCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
     // ── Flip height ──
     const updateHeight = useCallback((toRegister: boolean) => {
@@ -81,20 +100,10 @@ export default function Auth() {
         }
     }, [])
 
-    useEffect(() => {
-        updateHeight(isRegister)
-    }, [isRegister, updateHeight])
+    useEffect(() => { updateHeight(isRegister) }, [isRegister, updateHeight])
 
-    // ── Flip handlers ──
-    const switchToRegister = () => {
-        setIsRegister(true)
-        setLoginError('')
-    }
-
-    const switchToLogin = () => {
-        setIsRegister(false)
-        setRegError('')
-    }
+    const switchToRegister = () => { setIsRegister(true); setLoginError('') }
+    const switchToLogin = () => { setIsRegister(false); setRegError('') }
 
     // ── Password strength ──
     const checkStrength = (value: string) => {
@@ -111,7 +120,7 @@ export default function Auth() {
         setStrengthText(lvl.text)
     }
 
-    // ── Login submit ──
+    // ── Login ──
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoginError('')
@@ -132,16 +141,12 @@ export default function Auth() {
         }
     }
 
-    // ── Register submit ──
+    // ── Register ──
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (regPassword !== regPasswordConfirm) {
-            setMatchError(true)
-            return
-        }
+        if (regPassword !== regPasswordConfirm) { setMatchError(true); return }
         setRegError('')
         setRegSubmitting(true)
-
         const formData = new FormData()
         formData.append('name', regName)
         formData.append('email', regEmail)
@@ -151,7 +156,6 @@ export default function Auth() {
         formData.append('password_confirmation', regPasswordConfirm)
         formData.append('gender', regGender)
         formData.append('experience_years', regExperience)
-
         try {
             const data = await authService.register(formData)
             if (data.success) {
@@ -161,9 +165,7 @@ export default function Auth() {
                 if (data.errors) {
                     const firstKey = Object.keys(data.errors)[0]
                     if (firstKey) msg = data.errors[firstKey][0]
-                } else if (data.message) {
-                    msg = data.message
-                }
+                } else if (data.message) msg = data.message
                 setRegError(msg)
             }
         } catch (err: unknown) {
@@ -179,7 +181,7 @@ export default function Auth() {
         }
     }
 
-    // ── Verify modal ──
+    // ── Verify modal (registro) ──
     const openVerifyModal = (userId: number, email: string) => {
         setVerifyUserId(userId)
         setVerifyEmail(email)
@@ -200,10 +202,19 @@ export default function Auth() {
         setVerifyTimeLeft(900)
         countdownRef.current = setInterval(() => {
             setVerifyTimeLeft(prev => {
-                if (prev <= 1) {
-                    if (countdownRef.current) clearInterval(countdownRef.current)
-                    return 0
-                }
+                if (prev <= 1) { if (countdownRef.current) clearInterval(countdownRef.current); return 0 }
+                return prev - 1
+            })
+        }, 1000)
+    }
+
+    // ── Forgot countdown ──
+    const startForgotCountdown = () => {
+        if (forgotCountdownRef.current) clearInterval(forgotCountdownRef.current)
+        setForgotTimeLeft(900)
+        forgotCountdownRef.current = setInterval(() => {
+            setForgotTimeLeft(prev => {
+                if (prev <= 1) { if (forgotCountdownRef.current) clearInterval(forgotCountdownRef.current); return 0 }
                 return prev - 1
             })
         }, 1000)
@@ -212,6 +223,7 @@ export default function Auth() {
     useEffect(() => {
         return () => {
             if (countdownRef.current) clearInterval(countdownRef.current)
+            if (forgotCountdownRef.current) clearInterval(forgotCountdownRef.current)
         }
     }, [])
 
@@ -221,7 +233,7 @@ export default function Auth() {
         return `${m}:${s}`
     }
 
-    // ── Digit input handlers ──
+    // ── Verify digit handlers ──
     const handleDigitInput = (index: number, value: string) => {
         const clean = value.replace(/[^0-9]/g, '').slice(-1)
         const newDigits = [...verifyDigits]
@@ -231,22 +243,42 @@ export default function Auth() {
     }
 
     const handleDigitKeyDown = (index: number, e: React.KeyboardEvent) => {
-        if (e.key === 'Backspace' && !verifyDigits[index] && index > 0) {
-            digitRefs.current[index - 1]?.focus()
-        }
+        if (e.key === 'Backspace' && !verifyDigits[index] && index > 0) digitRefs.current[index - 1]?.focus()
     }
 
     const handleDigitPaste = (e: React.ClipboardEvent) => {
         e.preventDefault()
         const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '')
         if (pasted.length === 6) {
-            const newDigits = pasted.split('')
-            setVerifyDigits(newDigits)
+            setVerifyDigits(pasted.split(''))
             digitRefs.current[5]?.focus()
         }
     }
 
-    const allDigitsFilled = verifyDigits.every(d => d !== '')
+    // ── Forgot digit handlers ──
+    const handleForgotDigitInput = (index: number, value: string) => {
+        const clean = value.replace(/[^0-9]/g, '').slice(-1)
+        const newDigits = [...forgotDigits]
+        newDigits[index] = clean
+        setForgotDigits(newDigits)
+        if (clean && index < 5) forgotDigitRefs.current[index + 1]?.focus()
+    }
+
+    const handleForgotDigitKeyDown = (index: number, e: React.KeyboardEvent) => {
+        if (e.key === 'Backspace' && !forgotDigits[index] && index > 0) forgotDigitRefs.current[index - 1]?.focus()
+    }
+
+    const handleForgotDigitPaste = (e: React.ClipboardEvent) => {
+        e.preventDefault()
+        const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '')
+        if (pasted.length === 6) {
+            setForgotDigits(pasted.split(''))
+            forgotDigitRefs.current[5]?.focus()
+        }
+    }
+
+    const allVerifyFilled = verifyDigits.every(d => d !== '')
+    const allForgotFilled = forgotDigits.every(d => d !== '')
 
     // ── Verify submit ──
     const handleVerifySubmit = async (e: React.FormEvent) => {
@@ -257,9 +289,7 @@ export default function Auth() {
         try {
             const data = await authService.verifyCode(verifyUserId, code)
             if (data.success || data.redirect) {
-                if (data.token && data.user) {
-                    authLogin(data.token, data.user)
-                }
+                if (data.token && data.user) authLogin(data.token, data.user)
                 navigate(data.redirect || '/inicio')
             } else {
                 setVerifyAlert({ type: 'error', msg: data.message || 'Código incorrecto' })
@@ -283,15 +313,96 @@ export default function Auth() {
         setTimeout(() => setResendDisabled(false), 3000)
     }
 
+    // ── Forgot password handlers ──
+    const openForgotModal = () => {
+        setForgotOpen(true)
+        setForgotStep('email')
+        setForgotEmail('')
+        setForgotDigits(['', '', '', '', '', ''])
+        setForgotNewPass('')
+        setForgotNewPassConfirm('')
+        setForgotAlert(null)
+        setForgotMatchError(false)
+    }
+
+    const closeForgotModal = () => {
+        setForgotOpen(false)
+        if (forgotCountdownRef.current) clearInterval(forgotCountdownRef.current)
+    }
+
+    // Paso 1: enviar correo
+    const handleForgotEmail = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setForgotSubmitting(true)
+        setForgotAlert(null)
+        try {
+            const data = await authService.forgotPassword(forgotEmail)
+            if (data.success && data.user_id) {
+                setForgotUserId(data.user_id)
+                setForgotUserEmail(data.email ?? forgotEmail)
+                setForgotStep('code')
+                startForgotCountdown()
+                setTimeout(() => forgotDigitRefs.current[0]?.focus(), 350)
+            } else {
+                setForgotAlert({ type: 'error', msg: data.message || 'No se pudo enviar el código.' })
+            }
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } }
+            setForgotAlert({ type: 'error', msg: error.response?.data?.message || 'Error de conexión' })
+        } finally {
+            setForgotSubmitting(false)
+        }
+    }
+
+    // Paso 2: verificar código + nueva contraseña
+    const handleForgotReset = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (forgotNewPass !== forgotNewPassConfirm) { setForgotMatchError(true); return }
+        setForgotMatchError(false)
+        setForgotSubmitting(true)
+        setForgotAlert(null)
+        try {
+            const data = await authService.resetPassword(forgotUserId, forgotDigits.join(''), forgotNewPass, forgotNewPassConfirm)
+            if (data.success) {
+                setForgotAlert({ type: 'success', msg: '¡Contraseña restablecida! Ya puedes iniciar sesión.' })
+                if (forgotCountdownRef.current) clearInterval(forgotCountdownRef.current)
+                setTimeout(() => closeForgotModal(), 2500)
+            } else {
+                setForgotAlert({ type: 'error', msg: data.message || 'Código incorrecto.' })
+                if (data.expired) {
+                    setForgotStep('email')
+                    setForgotDigits(['', '', '', '', '', ''])
+                }
+            }
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } }
+            setForgotAlert({ type: 'error', msg: error.response?.data?.message || 'Error de conexión' })
+        } finally {
+            setForgotSubmitting(false)
+        }
+    }
+
+    const handleForgotResend = async () => {
+        setForgotResendDisabled(true)
+        try {
+            const data = await authService.forgotPassword(forgotUserEmail)
+            if (data.success) {
+                setForgotAlert({ type: 'success', msg: 'Código reenviado. Revisa tu correo.' })
+                startForgotCountdown()
+                setForgotDigits(['', '', '', '', '', ''])
+            }
+        } catch {
+            setForgotAlert({ type: 'error', msg: 'No se pudo reenviar el código.' })
+        }
+        setTimeout(() => setForgotResendDisabled(false), 3000)
+    }
+
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() - 1)
 
     return (
         <div className="auth-page">
-            {/* Fondo */}
-            <div className="auth-bg">
-                <img src="/img/paramo.jpg" alt="fondo" />
-            </div>
+            <div className="auth-bg"><img src="/img/paramo.jpg" alt="fondo" /></div>
             <div className="auth-lines"></div>
 
             <div className="auth-wrapper" id="authWrapper">
@@ -302,13 +413,9 @@ export default function Auth() {
                     <h1 className="panel-title">Agro<em>Finanzas</em></h1>
                     <div className="panel-divider"></div>
                     <p className="panel-sub">Decisiones inteligentes para el campo</p>
-
                     <div className="panel-cta">
                         <p>{isRegister ? '¿Ya tienes cuenta?' : '¿No tienes cuenta aún?'}</p>
-                        <button
-                            className="panel-switch-btn"
-                            onClick={isRegister ? switchToLogin : switchToRegister}
-                        >
+                        <button className="panel-switch-btn" onClick={isRegister ? switchToLogin : switchToRegister}>
                             <i className={`fas ${isRegister ? 'fa-right-to-bracket' : 'fa-user-plus'}`}></i>
                             <span>{isRegister ? 'Iniciar sesión' : 'Crear cuenta'}</span>
                         </button>
@@ -318,12 +425,9 @@ export default function Auth() {
                 {/* ══ FORMULARIOS ══ */}
                 <div className="auth-forms">
                     <div className="form-flip-wrapper">
-                        <div
-                            className={`form-flip-inner ${isRegister ? 'flipped' : ''}`}
-                            ref={flipRef}
-                            style={{ height: flipHeight }}
-                        >
-                            {/* ── CARA FRONTAL: LOGIN ── */}
+                        <div className={`form-flip-inner ${isRegister ? 'flipped' : ''}`} ref={flipRef} style={{ height: flipHeight }}>
+
+                            {/* ── LOGIN ── */}
                             <div className="form-face form-face--front" ref={frontRef}>
                                 <div className="auth-form-inner">
                                     <p className="form-eyebrow">Bienvenido de vuelta</p>
@@ -339,49 +443,31 @@ export default function Auth() {
                                     <form onSubmit={handleLogin}>
                                         <div className="field-group">
                                             <label><i className="fas fa-envelope"></i> Correo electrónico</label>
-                                            <input
-                                                type="email"
-                                                placeholder="correo@ejemplo.com"
-                                                value={loginEmail}
-                                                onChange={e => setLoginEmail(e.target.value)}
-                                                required
-                                                autoFocus
-                                            />
+                                            <input type="email" placeholder="correo@ejemplo.com" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required autoFocus />
                                         </div>
                                         <div className="field-group">
                                             <label><i className="fas fa-lock"></i> Contraseña</label>
                                             <div className="password-container">
-                                                <input
-                                                    type={loginPassVisible ? 'text' : 'password'}
-                                                    placeholder="Tu contraseña"
-                                                    value={loginPassword}
-                                                    onChange={e => setLoginPassword(e.target.value)}
-                                                    required
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="toggle-password"
-                                                    onClick={() => setLoginPassVisible(!loginPassVisible)}
-                                                >
+                                                <input type={loginPassVisible ? 'text' : 'password'} placeholder="Tu contraseña" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+                                                <button type="button" className="toggle-password" onClick={() => setLoginPassVisible(!loginPassVisible)}>
                                                     <i className={`fas ${loginPassVisible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="recordar">
-                                            <input
-                                                type="checkbox"
-                                                id="recordar"
-                                                checked={loginRemember}
-                                                onChange={e => setLoginRemember(e.target.checked)}
-                                            />
-                                            <label htmlFor="recordar">Recordar sesión</label>
+
+                                        <div className="login-extras">
+                                            <div className="recordar">
+                                                <input type="checkbox" id="recordar" checked={loginRemember} onChange={e => setLoginRemember(e.target.checked)} />
+                                                <label htmlFor="recordar">Recordar sesión</label>
+                                            </div>
+                                            {/* ── LINK OLVIDÉ CONTRASEÑA ── */}
+                                            <button type="button" className="forgot-link" onClick={openForgotModal}>
+                                                ¿Olvidaste tu contraseña?
+                                            </button>
                                         </div>
+
                                         <button type="submit" className="auth-submit-btn" disabled={loginSubmitting}>
-                                            {loginSubmitting ? (
-                                                <><i className="fas fa-spinner fa-spin"></i> Ingresando...</>
-                                            ) : (
-                                                <><i className="fas fa-right-to-bracket"></i> Ingresar</>
-                                            )}
+                                            {loginSubmitting ? <><i className="fas fa-spinner fa-spin"></i> Ingresando...</> : <><i className="fas fa-right-to-bracket"></i> Ingresar</>}
                                         </button>
                                     </form>
 
@@ -391,21 +477,16 @@ export default function Auth() {
                                 </div>
                             </div>
 
-                            {/* ── CARA TRASERA: REGISTER ── */}
+                            {/* ── REGISTER ── */}
                             <div className="form-face form-face--back" ref={backRef}>
                                 <div className="auth-form-inner">
                                     <p className="form-eyebrow">Únete a la comunidad</p>
                                     <h2 className="form-heading">Crear <em>cuenta</em></h2>
                                     <p className="form-desc">Gestiona tu campo con inteligencia financiera</p>
 
-                                    {regError && (
-                                        <div className="alert-error">
-                                            <i className="fas fa-circle-exclamation"></i> {regError}
-                                        </div>
-                                    )}
+                                    {regError && <div className="alert-error"><i className="fas fa-circle-exclamation"></i> {regError}</div>}
 
                                     <form onSubmit={handleRegister} className="register-form">
-                                        {/* Fila 1: Nombre + Correo */}
                                         <div className="field-row">
                                             <div className="field-group">
                                                 <label><i className="fas fa-user"></i> Nombre</label>
@@ -416,8 +497,6 @@ export default function Auth() {
                                                 <input type="email" placeholder="correo@ejemplo.com" value={regEmail} onChange={e => setRegEmail(e.target.value)} required />
                                             </div>
                                         </div>
-
-                                        {/* Fila 2: Teléfono + Nacimiento */}
                                         <div className="field-row">
                                             <div className="field-group">
                                                 <label><i className="fas fa-phone"></i> Teléfono <span className="optional">(opc.)</span></label>
@@ -428,19 +507,11 @@ export default function Auth() {
                                                 <input type="date" value={regBirthDate} onChange={e => setRegBirthDate(e.target.value)} max={maxDate.toISOString().split('T')[0]} required />
                                             </div>
                                         </div>
-
-                                        {/* Fila 3: Contraseña + Confirmar */}
                                         <div className="field-row">
                                             <div className="field-group">
                                                 <label><i className="fas fa-lock"></i> Contraseña</label>
                                                 <div className="password-container">
-                                                    <input
-                                                        type={regPassVisible ? 'text' : 'password'}
-                                                        placeholder="Mínimo 8 caracteres"
-                                                        value={regPassword}
-                                                        onChange={e => { setRegPassword(e.target.value); checkStrength(e.target.value) }}
-                                                        required
-                                                    />
+                                                    <input type={regPassVisible ? 'text' : 'password'} placeholder="Mínimo 8 caracteres" value={regPassword} onChange={e => { setRegPassword(e.target.value); checkStrength(e.target.value) }} required />
                                                     <button type="button" className="toggle-password" onClick={() => setRegPassVisible(!regPassVisible)}>
                                                         <i className={`fas ${regPassVisible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                                     </button>
@@ -449,16 +520,7 @@ export default function Auth() {
                                             <div className="field-group">
                                                 <label><i className="fas fa-lock"></i> Confirmar</label>
                                                 <div className="password-container">
-                                                    <input
-                                                        type={regPassConfirmVisible ? 'text' : 'password'}
-                                                        placeholder="Repite tu contraseña"
-                                                        value={regPasswordConfirm}
-                                                        onChange={e => {
-                                                            setRegPasswordConfirm(e.target.value)
-                                                            setMatchError(e.target.value !== '' && regPassword !== e.target.value)
-                                                        }}
-                                                        required
-                                                    />
+                                                    <input type={regPassConfirmVisible ? 'text' : 'password'} placeholder="Repite tu contraseña" value={regPasswordConfirm} onChange={e => { setRegPasswordConfirm(e.target.value); setMatchError(e.target.value !== '' && regPassword !== e.target.value) }} required />
                                                     <button type="button" className="toggle-password" onClick={() => setRegPassConfirmVisible(!regPassConfirmVisible)}>
                                                         <i className={`fas ${regPassConfirmVisible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                                     </button>
@@ -466,18 +528,12 @@ export default function Auth() {
                                                 {matchError && <span className="field-error">No coinciden.</span>}
                                             </div>
                                         </div>
-
-                                        {/* Barra fuerza contraseña */}
                                         {strengthVisible && (
                                             <div className="strength-bar-wrapper">
-                                                <div className="strength-bar">
-                                                    <div className="strength-fill" style={{ width: strengthPct, background: strengthColor }}></div>
-                                                </div>
+                                                <div className="strength-bar"><div className="strength-fill" style={{ width: strengthPct, background: strengthColor }}></div></div>
                                                 <span className="strength-label" style={{ color: strengthColor }}>{strengthText}</span>
                                             </div>
                                         )}
-
-                                        {/* Fila 4: Género + Experiencia */}
                                         <div className="field-row">
                                             <div className="field-group">
                                                 <label><i className="fas fa-venus-mars"></i> Género <span className="optional">(opc.)</span></label>
@@ -493,13 +549,8 @@ export default function Auth() {
                                                 <input type="number" placeholder="Ej: 5" min={0} max={70} value={regExperience} onChange={e => setRegExperience(e.target.value)} />
                                             </div>
                                         </div>
-
                                         <button type="submit" className="auth-submit-btn" disabled={regSubmitting}>
-                                            {regSubmitting ? (
-                                                <><i className="fas fa-spinner fa-spin"></i> Creando...</>
-                                            ) : (
-                                                <><i className="fas fa-user-plus"></i> Crear Cuenta</>
-                                            )}
+                                            {regSubmitting ? <><i className="fas fa-spinner fa-spin"></i> Creando...</> : <><i className="fas fa-user-plus"></i> Crear Cuenta</>}
                                         </button>
                                     </form>
 
@@ -508,51 +559,28 @@ export default function Auth() {
                                     </p>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* ══ MODAL VERIFICACIÓN ══ */}
-            <div
-                className={`verify-modal-overlay ${verifyOpen ? 'open' : ''}`}
-                onClick={e => { if (e.target === e.currentTarget) closeVerifyModal() }}
-            >
+            {/* ══ MODAL VERIFICACIÓN (registro) ══ */}
+            <div className={`verify-modal-overlay ${verifyOpen ? 'open' : ''}`} onClick={e => { if (e.target === e.currentTarget) closeVerifyModal() }}>
                 <div className="verify-modal">
-                    <button className="verify-modal-close" onClick={closeVerifyModal} aria-label="Cerrar">
-                        <i className="fas fa-times"></i>
-                    </button>
-
-                    <div className="verify-modal-icon">
-                        <i className="fas fa-envelope-open-text"></i>
-                    </div>
-
+                    <button className="verify-modal-close" onClick={closeVerifyModal}><i className="fas fa-times"></i></button>
+                    <div className="verify-modal-icon"><i className="fas fa-envelope-open-text"></i></div>
                     <h2 className="verify-modal-title">Verifica tu cuenta</h2>
-                    <p className="verify-modal-sub">
-                        Ingresa el código de 6 dígitos enviado a<br />
-                        <strong>{verifyEmail}</strong>
-                    </p>
-
+                    <p className="verify-modal-sub">Ingresa el código de 6 dígitos enviado a<br /><strong>{verifyEmail}</strong></p>
                     {verifyAlert && (
                         <div className={`verify-modal-alert ${verifyAlert.type}`}>
                             <i className={`fas ${verifyAlert.type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}`}></i>
                             <span>{verifyAlert.msg}</span>
                         </div>
                     )}
-
                     <form onSubmit={handleVerifySubmit}>
                         <div className="verify-code-inputs">
                             {verifyDigits.map((digit, i) => (
-                                <input
-                                    key={i}
-                                    type="text"
-                                    className="verify-digit"
-                                    maxLength={1}
-                                    inputMode="numeric"
-                                    pattern="[0-9]"
-                                    autoComplete="off"
-                                    value={digit}
+                                <input key={i} type="text" className="verify-digit" maxLength={1} inputMode="numeric" pattern="[0-9]" autoComplete="off" value={digit}
                                     ref={el => { digitRefs.current[i] = el }}
                                     onChange={e => handleDigitInput(i, e.target.value)}
                                     onKeyDown={e => handleDigitKeyDown(i, e)}
@@ -561,28 +589,15 @@ export default function Auth() {
                                 />
                             ))}
                         </div>
-
-                        <button
-                            type="submit"
-                            className={`verify-modal-btn ${allDigitsFilled ? 'ready' : ''}`}
-                            disabled={!allDigitsFilled || verifySubmitting}
-                        >
-                            {verifySubmitting ? (
-                                <><i className="fas fa-spinner fa-spin"></i> Verificando...</>
-                            ) : (
-                                <><i className="fas fa-shield-check"></i> Verificar cuenta</>
-                            )}
+                        <button type="submit" className={`verify-modal-btn ${allVerifyFilled ? 'ready' : ''}`} disabled={!allVerifyFilled || verifySubmitting}>
+                            {verifySubmitting ? <><i className="fas fa-spinner fa-spin"></i> Verificando...</> : <><i className="fas fa-shield-check"></i> Verificar cuenta</>}
                         </button>
                     </form>
-
                     <p className="verify-modal-timer">
-                        {verifyTimeLeft > 0 ? (
-                            <>El código expira en <span style={verifyTimeLeft <= 60 ? { color: '#e74c3c' } : undefined}>{formatTime(verifyTimeLeft)}</span></>
-                        ) : (
-                            <span style={{ color: '#e74c3c' }}>El código expiró. Reenvía uno nuevo.</span>
-                        )}
+                        {verifyTimeLeft > 0
+                            ? <>El código expira en <span style={verifyTimeLeft <= 60 ? { color: '#e74c3c' } : undefined}>{formatTime(verifyTimeLeft)}</span></>
+                            : <span style={{ color: '#e74c3c' }}>El código expiró. Reenvía uno nuevo.</span>}
                     </p>
-
                     <div className="verify-modal-resend">
                         ¿No llegó?
                         <button onClick={handleResend} disabled={resendDisabled}>
@@ -592,6 +607,110 @@ export default function Auth() {
                 </div>
             </div>
 
+            {/* ══ MODAL OLVIDÉ CONTRASEÑA ══ */}
+            <div className={`verify-modal-overlay ${forgotOpen ? 'open' : ''}`} onClick={e => { if (e.target === e.currentTarget) closeForgotModal() }}>
+                <div className="verify-modal">
+                    <button className="verify-modal-close" onClick={closeForgotModal}><i className="fas fa-times"></i></button>
+
+                    {/* ── PASO 1: pedir correo ── */}
+                    {forgotStep === 'email' && (
+                        <>
+                            <div className="verify-modal-icon" style={{ background: 'rgba(59,130,246,0.08)', borderColor: 'rgba(59,130,246,0.25)', color: '#3b82f6' }}>
+                                <i className="fas fa-key"></i>
+                            </div>
+                            <h2 className="verify-modal-title">Recuperar contraseña</h2>
+                            <p className="verify-modal-sub">Ingresa tu correo y te enviaremos<br />un código de 6 dígitos</p>
+
+                            {forgotAlert && (
+                                <div className={`verify-modal-alert ${forgotAlert.type}`}>
+                                    <i className={`fas ${forgotAlert.type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}`}></i>
+                                    <span>{forgotAlert.msg}</span>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleForgotEmail} style={{ width: '100%' }}>
+                                <div className="field-group" style={{ marginBottom: '20px' }}>
+                                    <label><i className="fas fa-envelope"></i> Correo electrónico</label>
+                                    <input type="email" placeholder="correo@ejemplo.com" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required autoFocus />
+                                </div>
+                                <button type="submit" className="verify-modal-btn" disabled={forgotSubmitting} style={{ background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)' }}>
+                                    {forgotSubmitting ? <><i className="fas fa-spinner fa-spin"></i> Enviando...</> : <><i className="fas fa-paper-plane"></i> Enviar código</>}
+                                </button>
+                            </form>
+                        </>
+                    )}
+
+                    {/* ── PASO 2: código + nueva contraseña ── */}
+                    {forgotStep === 'code' && (
+                        <>
+                            <div className="verify-modal-icon">
+                                <i className="fas fa-lock-open"></i>
+                            </div>
+                            <h2 className="verify-modal-title">Nueva contraseña</h2>
+                            <p className="verify-modal-sub">Código enviado a<br /><strong>{forgotUserEmail}</strong></p>
+
+                            {forgotAlert && (
+                                <div className={`verify-modal-alert ${forgotAlert.type}`}>
+                                    <i className={`fas ${forgotAlert.type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}`}></i>
+                                    <span>{forgotAlert.msg}</span>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleForgotReset} style={{ width: '100%' }}>
+                                {/* Dígitos */}
+                                <div className="verify-code-inputs">
+                                    {forgotDigits.map((digit, i) => (
+                                        <input key={i} type="text" className="verify-digit" maxLength={1} inputMode="numeric" pattern="[0-9]" autoComplete="off" value={digit}
+                                            ref={el => { forgotDigitRefs.current[i] = el }}
+                                            onChange={e => handleForgotDigitInput(i, e.target.value)}
+                                            onKeyDown={e => handleForgotDigitKeyDown(i, e)}
+                                            onPaste={i === 0 ? handleForgotDigitPaste : undefined}
+                                            onKeyPress={e => { if (!/[0-9]/.test(e.key)) e.preventDefault() }}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Nueva contraseña */}
+                                <div className="field-group" style={{ marginBottom: '12px' }}>
+                                    <label><i className="fas fa-lock"></i> Nueva contraseña</label>
+                                    <div className="password-container">
+                                        <input type={forgotNewPassVisible ? 'text' : 'password'} placeholder="Mínimo 8 caracteres" value={forgotNewPass} onChange={e => setForgotNewPass(e.target.value)} required />
+                                        <button type="button" className="toggle-password" onClick={() => setForgotNewPassVisible(!forgotNewPassVisible)}>
+                                            <i className={`fas ${forgotNewPassVisible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="field-group" style={{ marginBottom: '20px' }}>
+                                    <label><i className="fas fa-lock"></i> Confirmar contraseña</label>
+                                    <div className="password-container">
+                                        <input type={forgotNewPassConfirmVisible ? 'text' : 'password'} placeholder="Repite tu contraseña" value={forgotNewPassConfirm} onChange={e => { setForgotNewPassConfirm(e.target.value); setForgotMatchError(e.target.value !== '' && forgotNewPass !== e.target.value) }} required />
+                                        <button type="button" className="toggle-password" onClick={() => setForgotNewPassConfirmVisible(!forgotNewPassConfirmVisible)}>
+                                            <i className={`fas ${forgotNewPassConfirmVisible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                                        </button>
+                                    </div>
+                                    {forgotMatchError && <span className="field-error">Las contraseñas no coinciden.</span>}
+                                </div>
+
+                                <button type="submit" className={`verify-modal-btn ${allForgotFilled ? 'ready' : ''}`} disabled={!allForgotFilled || forgotSubmitting}>
+                                    {forgotSubmitting ? <><i className="fas fa-spinner fa-spin"></i> Guardando...</> : <><i className="fas fa-shield-check"></i> Restablecer contraseña</>}
+                                </button>
+                            </form>
+
+                            <p className="verify-modal-timer">
+                                {forgotTimeLeft > 0
+                                    ? <>El código expira en <span style={forgotTimeLeft <= 60 ? { color: '#e74c3c' } : undefined}>{formatTime(forgotTimeLeft)}</span></>
+                                    : <span style={{ color: '#e74c3c' }}>El código expiró. Reenvía uno nuevo.</span>}
+                            </p>
+                            <div className="verify-modal-resend">
+                                ¿No llegó?
+                                <button onClick={handleForgotResend} disabled={forgotResendDisabled}>
+                                    {forgotResendDisabled ? 'Enviando...' : 'Reenviar código'}
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }
