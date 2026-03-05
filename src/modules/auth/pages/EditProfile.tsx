@@ -198,16 +198,17 @@ export default function EditProfile() {
 
     // ── Delete: confirmar con código ──
     const handleDeleteConfirm = useCallback(async () => {
-        if (!user) return
-        const code = deleteDigits.join('')
-        try {
-            await axiosClient.delete(`/users/${user.id}`, { data: { code } })
-            logout()
-            navigate('/')
-        } catch {
-            setErrorMsg('Código incorrecto o error al eliminar.')
-        }
-    }, [deleteDigits, user, logout, navigate])
+    if (!user) return
+    const code = deleteDigits.join('')
+    try {
+        // Cambia DELETE por POST
+        await axiosClient.post(`/users/${user.id}/delete-confirm`, { code })
+        logout()
+        navigate('/')
+    } catch {
+        setErrorMsg('Código incorrecto o error al eliminar.')
+    }
+}, [deleteDigits, user, logout, navigate])
 
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() - 1)
