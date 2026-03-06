@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { hatoService } from '../services/hatoService'
 import type { Animal, HatoSummary } from '../services/hatoService'
 import './HatoIndex.css'
@@ -34,121 +34,31 @@ const STATUSES = [
 ]
 
 
-/* ══════════════════════════════════════════════════════════════
-   HOOK — useDraggable
-   Permite arrastrar el modal desde su header.
-   Devuelve: ref para el sheet, handler onMouseDown para el header.
-══════════════════════════════════════════════════════════════ */
-function useDraggable() {
-    const sheetRef = useRef<HTMLDivElement>(null)
 
-    // Inicializa el sheet en posición fija absoluta (sin transform)
-    // la primera vez que se intenta arrastrar
-    const initPosition = (sheet: HTMLDivElement) => {
-        if (sheet.dataset.draggable === 'ready') return
-        const rect = sheet.getBoundingClientRect()
-        // Quitar el transform:translate(-50%,-50%) y fijar con left/top reales
-        sheet.style.transform = 'none'
-        sheet.style.left      = rect.left + 'px'
-        sheet.style.top       = rect.top  + 'px'
-        sheet.style.margin    = '0'
-        sheet.dataset.draggable = 'ready'
-    }
-
-    const startDrag = (clientX: number, clientY: number) => {
-        const sheet = sheetRef.current
-        if (!sheet) return null
-
-        initPosition(sheet)
-        sheet.classList.add('is-dragging')
-
-        const rect   = sheet.getBoundingClientRect()
-        const offX   = clientX - rect.left
-        const offY   = clientY - rect.top
-
-        return { sheet, offX, offY }
-    }
-
-    const onMouseDown = (e: React.MouseEvent) => {
-        if ((e.target as HTMLElement).closest('button, a, input, select, textarea')) return
-        const drag = startDrag(e.clientX, e.clientY)
-        if (!drag) return
-        const { sheet, offX, offY } = drag
-
-        const onMove = (ev: MouseEvent) => {
-            const maxX = window.innerWidth  - sheet.offsetWidth
-            const maxY = window.innerHeight - sheet.offsetHeight
-            sheet.style.left = Math.max(0, Math.min(ev.clientX - offX, maxX)) + 'px'
-            sheet.style.top  = Math.max(0, Math.min(ev.clientY - offY, maxY)) + 'px'
-        }
-        const onUp = () => {
-            sheet.classList.remove('is-dragging')
-            window.removeEventListener('mousemove', onMove)
-            window.removeEventListener('mouseup',   onUp)
-        }
-        window.addEventListener('mousemove', onMove)
-        window.addEventListener('mouseup',   onUp)
-        e.preventDefault()
-    }
-
-    // Soporte táctil
-    const onTouchStart = (e: React.TouchEvent) => {
-        if ((e.target as HTMLElement).closest('button, a, input, select, textarea')) return
-        const t    = e.touches[0]
-        const drag = startDrag(t.clientX, t.clientY)
-        if (!drag) return
-        const { sheet, offX, offY } = drag
-
-        const onMove = (ev: TouchEvent) => {
-            const tc   = ev.touches[0]
-            const maxX = window.innerWidth  - sheet.offsetWidth
-            const maxY = window.innerHeight - sheet.offsetHeight
-            sheet.style.left = Math.max(0, Math.min(tc.clientX - offX, maxX)) + 'px'
-            sheet.style.top  = Math.max(0, Math.min(tc.clientY - offY, maxY)) + 'px'
-            ev.preventDefault()
-        }
-        const onEnd = () => {
-            sheet.classList.remove('is-dragging')
-            window.removeEventListener('touchmove', onMove)
-            window.removeEventListener('touchend',  onEnd)
-        }
-        window.addEventListener('touchmove', onMove, { passive: false })
-        window.addEventListener('touchend',  onEnd)
-    }
-
-    return { sheetRef, onMouseDown, onTouchStart }
-}
-
-/* ══════════════════════════════════════════════════════════════
-   MODAL — FICHA ANIMAL (SHOW)
-══════════════════════════════════════════════════════════════ */
 interface ShowModalProps {
     animal: Animal
     onClose: () => void
-    onEdit: () => void
+    onEdit:  () => void
     onDelete: () => void
-    onBirth: () => void
+    onBirth:  () => void
 }
 
 function ShowModal({ animal, onClose, onEdit, onDelete, onBirth }: ShowModalProps) {
     const purpose = animal.purpose ?? animal.use_milk_meat
     const weight  = animal.weight  ?? animal.average_weight
     const calf    = isCalf(animal)
-    const { sheetRef, onMouseDown, onTouchStart } = useDraggable()
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
         document.addEventListener('keydown', handler)
-        document.body.style.overflow = 'hidden'
-        return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = '' }
+        return () => { document.removeEventListener('keydown', handler) }
     }, [onClose])
 
     return (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-            <div className="modal-sheet modal-sheet--wide" ref={sheetRef}>
-                {/* Header — arrastrar aquí */}
-                <div className="modal-header modal-header--crema" onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
-                    <span className="drag-dots"><i className="fas fa-grip-vertical"></i><i className="fas fa-grip-vertical"></i></span>
+            <div className="modal-sheet modal-sheet--wide">
+                {/* Header */}
+                <div className="modal-header modal-header--crema">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div className="modal-header-icon">
                             <i className={`fas fa-${calf ? 'paw' : 'cow'}`}></i>
@@ -260,7 +170,7 @@ function ShowModal({ animal, onClose, onEdit, onDelete, onBirth }: ShowModalProp
                         <div className="info-section">
                             <div className="info-section__title"><i className="fas fa-paw"></i> Descendencia ({animal.calves.length})</div>
                             <div className="info-grid">
-                                {animal.calves.map(c => (
+                                {(animal.calves ?? []).map((c: { id: number; name?: string; gender: string; birth_date?: string; age_text?: string }) => (
                                     <div className="calf-show-chip" key={c.id}>
                                         <div className="info-item__label">
                                             <i className={`fas fa-${isFemale(c.gender) ? 'venus' : 'mars'}`}></i>
@@ -320,7 +230,6 @@ function AnimalFormModal({ animal, mothers, onClose, onSaved }: AnimalFormModalP
     const [submitting, setSubmitting] = useState(false)
     const [error, setError]           = useState('')
     const [previewUrl, setPreviewUrl] = useState(animal?.photo_url ?? animal?.photo ?? '')
-    const { sheetRef, onMouseDown, onTouchStart } = useDraggable()
 
     const isEdit = !!animal
     const purpose = animal?.purpose ?? animal?.use_milk_meat ?? ''
@@ -344,8 +253,7 @@ function AnimalFormModal({ animal, mothers, onClose, onSaved }: AnimalFormModalP
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
         document.addEventListener('keydown', handler)
-        document.body.style.overflow = 'hidden'
-        return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = '' }
+        return () => { document.removeEventListener('keydown', handler) }
     }, [onClose])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -392,9 +300,8 @@ function AnimalFormModal({ animal, mothers, onClose, onSaved }: AnimalFormModalP
 
     return (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-            <div className="modal-sheet modal-sheet--wide" ref={sheetRef}>
-                <div className="modal-header modal-header--tierra" onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
-                    <span className="drag-dots"><i className="fas fa-grip-vertical"></i><i className="fas fa-grip-vertical"></i></span>
+            <div className="modal-sheet modal-sheet--wide">
+                <div className="modal-header modal-header--tierra">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div className="modal-header-icon">
                             <i className={`fas ${isEdit ? 'fa-pen-to-square' : 'fa-cow'}`}></i>
@@ -559,7 +466,6 @@ function BirthModal({ mother, onClose, onSaved }: BirthModalProps) {
     const [submitting, setSubmitting] = useState(false)
     const [error, setError]           = useState('')
     const [previewUrl, setPreviewUrl] = useState('')
-    const { sheetRef, onMouseDown, onTouchStart } = useDraggable()
 
     const [form, setForm] = useState({
         name:       '',
@@ -573,8 +479,7 @@ function BirthModal({ mother, onClose, onSaved }: BirthModalProps) {
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
         document.addEventListener('keydown', handler)
-        document.body.style.overflow = 'hidden'
-        return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = '' }
+        return () => { document.removeEventListener('keydown', handler) }
     }, [onClose])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -607,9 +512,8 @@ function BirthModal({ mother, onClose, onSaved }: BirthModalProps) {
 
     return (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-            <div className="modal-sheet" ref={sheetRef}>
-                <div className="modal-header modal-header--pasto" onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
-                    <span className="drag-dots"><i className="fas fa-grip-vertical"></i><i className="fas fa-grip-vertical"></i></span>
+            <div className="modal-sheet">
+                <div className="modal-header modal-header--pasto">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div className="modal-header-icon"><i className="fas fa-stethoscope"></i></div>
                         <div>
@@ -718,12 +622,11 @@ interface CardProps {
     animal: Animal
     index: number
     onView: (a: Animal) => void
-    onEdit: (a: Animal) => void
     onDelete: (id: number) => void
     onBirth: (a: Animal) => void
 }
 
-function AnimalCard({ animal, index, onView, onEdit, onDelete, onBirth }: CardProps) {
+function AnimalCard({ animal, index, onView, onDelete, onBirth }: CardProps) {
     const purpose = animal.purpose ?? animal.use_milk_meat
     const weight  = animal.weight  ?? animal.average_weight
     const calf    = isCalf(animal)
@@ -797,7 +700,7 @@ function AnimalCard({ animal, index, onView, onEdit, onDelete, onBirth }: CardPr
                         <div className="calves-label">
                             <i className="fas fa-sitemap"></i> Descendencia ({animal.calves.length})
                         </div>
-                        {animal.calves.map(c => (
+                        {(animal.calves ?? []).map((c: { id: number; name?: string; gender: string; birth_date?: string; age_text?: string }) => (
                             <span className="calf-chip" key={c.id}>
                                 <i className={`fas fa-${isFemale(c.gender) ? 'venus' : 'mars'}`}></i>
                                 {c.name || 'Sin nombre'}
@@ -836,7 +739,6 @@ export default function GanadoIndex() {
 
     // Modal state
     const [showAnimal,   setShowAnimal]   = useState<Animal | null>(null)
-    const [editAnimal,   setEditAnimal]   = useState<Animal | null | 'new'>('new' as any)
     const [birthAnimal,  setBirthAnimal]  = useState<Animal | null>(null)
     const [modalCreate,  setModalCreate]  = useState(false)
     const [modalEdit,    setModalEdit]    = useState<Animal | null>(null)
@@ -961,7 +863,6 @@ export default function GanadoIndex() {
                             animal={a}
                             index={i}
                             onView={setShowAnimal}
-                            onEdit={setModalEdit}
                             onDelete={handleDelete}
                             onBirth={setBirthAnimal}
                         />
