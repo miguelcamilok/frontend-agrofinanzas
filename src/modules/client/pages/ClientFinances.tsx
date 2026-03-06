@@ -14,7 +14,7 @@ Chart.register(
     CategoryScale, LinearScale, Tooltip, Legend
 )
 
-/* ── Constants ───────────────────────────────────────────── */
+/* ── Constants ─────────────────────────────────────────────── */
 const FILTER_OPTIONS = [
     { key: 'all',        label: 'Todos',       icon: 'fa-th-large' },
     { key: 'income',     label: 'Ingresos',    icon: 'fa-arrow-trend-up' },
@@ -44,25 +44,29 @@ const SUMMARY_CARDS = [
     { key: 'totalCosts',      label: 'Costos',      icon: 'fa-seedling',         cls: 'costs' },
 ]
 
-/* ── Paleta Sky & Lime para Chart.js ─────────────────────── */
+/* ── Paleta Tierra y Campo para Chart.js ──────────────────── */
 const C = {
-    income:    '#4ade80',
-    expense:   '#f87171',
-    invest:    '#38bdf8',   // azul cielo
-    debt:      '#fb923c',
-    inventory: '#c084fc',
-    costs:     '#a8d832',   // verde lima
-    green:     '#a8d832',
-    greenL:    '#c4f041',
+    income:    '#7AAF5A',
+    expense:   '#c0392b',
+    invest:    '#5B8DB8',
+    debt:      '#D4841A',
+    inventory: '#9b7ed4',
+    costs:     '#A0522D',
+    paja:      '#C8A96E',
+    pajaL:     '#dfc48c',
+}
+const GRID  = 'rgba(200,169,110,.08)'
+const TCLR  = 'rgba(200,169,110,.4)'
+const TFONT = { family: "'Source Sans 3'", size: 11 } as const
+const mFmt  = (v: number | string) => '$' + Number(v).toLocaleString('es-CO')
+const SCALE = {
+    x: { grid: { color: GRID }, ticks: { color: TCLR, font: TFONT } },
+    y: { grid: { color: GRID }, ticks: { color: TCLR, font: TFONT, callback: mFmt } },
 }
 
-/* ── Helpers ─────────────────────────────────────────────── */
+/* ── Helpers ──────────────────────────────────────────────── */
 const fmtMoney = (n: number) =>
-    '$' + Math.abs(n).toLocaleString('es-CO', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-        useGrouping: true,
-    })
+    '$' + Math.abs(n).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 
 const fmtDate = (raw: string | undefined): string => {
     if (!raw) return '—'
@@ -71,19 +75,9 @@ const fmtDate = (raw: string | undefined): string => {
     return d.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-/* ── Chart registry ──────────────────────────────────────── */
+/* ── Chart registry ───────────────────────────────────────── */
 const charts: Record<string, Chart> = {}
 const destroyChart = (id: string) => { if (charts[id]) { charts[id].destroy(); delete charts[id] } }
-
-/* Escala de colores ajustada a la paleta azul-verde */
-const GRID  = 'rgba(56,189,248,.10)'
-const TCLR  = '#3d5a68'
-const TFONT = { family: "'Plus Jakarta Sans'", size: 11 } as const
-const mFmt  = (v: number | string) => '$' + Number(v).toLocaleString('es-CO')
-const SCALE = {
-    x: { grid: { color: GRID }, ticks: { color: TCLR, font: TFONT } },
-    y: { grid: { color: GRID }, ticks: { color: TCLR, font: TFONT, callback: mFmt } },
-}
 
 function buildMonthly(finances: FinanceItem[]) {
     const map: Record<string, { inc: number; exp: number }> = {}
@@ -107,10 +101,17 @@ function buildByCat(finances: FinanceItem[]) {
     const map: Record<string, number> = {}
     finances.forEach(f => { const k = f.category || f.type; map[k] = (map[k] ?? 0) + f.amount })
     const keys = Object.keys(map)
-    return { labels: keys, data: keys.map(k => map[k]) }
+    const palette = [C.income, C.expense, C.invest, C.debt, C.inventory, C.costs, C.paja]
+    return {
+        labels: keys,
+        data: keys.map(k => map[k]),
+        colors: keys.map((_, i) => palette[i % palette.length]),
+    }
 }
 
-/* ── Component ───────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+══════════════════════════════════════════════════════════════ */
 export default function ClientFinances() {
     const [filter, setFilter]       = useState('all')
     const [finances, setFinances]   = useState<FinanceItem[]>([])
@@ -134,20 +135,20 @@ export default function ClientFinances() {
 
     const heroBgRef = useRef<HTMLDivElement>(null)
 
-    /* ── Parallax + fade on scroll ───────────────────────── */
+    /* ── Parallax ── */
     useEffect(() => {
         const onScroll = () => {
             const el = heroBgRef.current
             if (!el) return
             const s = window.scrollY
-            el.style.opacity   = String(Math.max(0.20, 1 - s / 360))
-            el.style.transform = `translateY(${s * 0.20}px)`
+            el.style.opacity   = String(Math.max(0.15, 1 - s / 340))
+            el.style.transform = `translateY(${s * 0.18}px)`
         }
         window.addEventListener('scroll', onScroll, { passive: true })
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
 
-    /* ── Fetch ───────────────────────────────────────────── */
+    /* ── Fetch ── */
     const fetchData = useCallback(async () => {
         setLoading(true)
         try {
@@ -163,26 +164,25 @@ export default function ClientFinances() {
             }
             setFinances(items)
             setTotals({
-                totalIncome:      d.totalIncome,
-                totalExpense:     d.totalExpense,
-                balance:          d.balance,
-                totalInvestment:  d.totalInvestment,
-                totalDebt:        d.totalDebt,
-                totalInventory:   d.totalInventory,
-                totalCosts:       d.totalCosts,
+                totalIncome:     d.totalIncome,
+                totalExpense:    d.totalExpense,
+                balance:         d.balance,
+                totalInvestment: d.totalInvestment,
+                totalDebt:       d.totalDebt,
+                totalInventory:  d.totalInventory,
+                totalCosts:      d.totalCosts,
             })
         } finally { setLoading(false) }
     }, [filter, activeDR])
 
     useEffect(() => { fetchData() }, [fetchData])
 
-    /* ── Charts ──────────────────────────────────────────── */
+    /* ── Charts ── */
     useEffect(() => {
         if (loading) return
         const monthly = buildMonthly(finances)
         const byCat   = buildByCat(finances)
 
-        /* Donut: Ingresos vs Gastos */
         destroyChart('ch1')
         const el1 = document.getElementById('ch1') as HTMLCanvasElement | null
         if (el1) charts['ch1'] = new Chart(el1, {
@@ -193,21 +193,18 @@ export default function ClientFinances() {
                     data: [totals.totalIncome ?? 0, totals.totalExpense ?? 0],
                     backgroundColor: [C.income + 'cc', C.expense + 'cc'],
                     borderColor: [C.income, C.expense],
-                    borderWidth: 2,
-                    hoverOffset: 7,
+                    borderWidth: 2, hoverOffset: 7,
                 }],
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                animation: { duration: 700, animateRotate: true } as any,
                 cutout: '58%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { color: TCLR, font: TFONT, boxWidth: 11, padding: 14 } },
+                    legend: { position: 'bottom', labels: { color: TCLR, font: TFONT, boxWidth: 10, padding: 14 } },
                 },
             },
         })
 
-        /* Barras: Tendencia mensual */
         destroyChart('ch2')
         const el2 = document.getElementById('ch2') as HTMLCanvasElement | null
         if (el2) charts['ch2'] = new Chart(el2, {
@@ -215,19 +212,17 @@ export default function ClientFinances() {
             data: {
                 labels: monthly.labels,
                 datasets: [
-                    { label: 'Ingresos', data: monthly.income,  backgroundColor: C.income  + '88', borderColor: C.income,  borderWidth: 1.5, borderRadius: 4 },
-                    { label: 'Gastos',   data: monthly.expense, backgroundColor: C.expense + '88', borderColor: C.expense, borderWidth: 1.5, borderRadius: 4 },
+                    { label: 'Ingresos', data: monthly.income,  backgroundColor: C.income  + '88', borderColor: C.income,  borderWidth: 1.5, borderRadius: 3 },
+                    { label: 'Gastos',   data: monthly.expense, backgroundColor: C.expense + '88', borderColor: C.expense, borderWidth: 1.5, borderRadius: 3 },
                 ],
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                animation: { duration: 700 },
-                plugins: { legend: { labels: { color: TCLR, font: TFONT, boxWidth: 10 } } },
+                plugins: { legend: { labels: { color: TCLR, font: TFONT, boxWidth: 9 } } },
                 scales: SCALE,
             },
         })
 
-        /* Línea: Balance acumulado */
         destroyChart('ch3')
         const el3 = document.getElementById('ch3') as HTMLCanvasElement | null
         if (el3) charts['ch3'] = new Chart(el3, {
@@ -237,24 +232,19 @@ export default function ClientFinances() {
                 datasets: [{
                     label: 'Balance',
                     data: monthly.balance,
-                    borderColor: C.green,
-                    backgroundColor: C.green + '1a',
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: C.green,
-                    tension: .4,
-                    fill: true,
+                    borderColor: C.paja,
+                    backgroundColor: C.paja + '18',
+                    borderWidth: 2, pointRadius: 4,
+                    pointBackgroundColor: C.paja, tension: .4, fill: true,
                 }],
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                animation: { duration: 900 },
-                plugins: { legend: { labels: { color: TCLR, font: TFONT, boxWidth: 10 } } },
+                plugins: { legend: { labels: { color: TCLR, font: TFONT, boxWidth: 9 } } },
                 scales: SCALE,
             },
         })
 
-        /* Barras horizontales: Por categoría */
         destroyChart('ch4')
         const el4 = document.getElementById('ch4') as HTMLCanvasElement | null
         if (el4) charts['ch4'] = new Chart(el4, {
@@ -264,16 +254,14 @@ export default function ClientFinances() {
                 datasets: [{
                     label: 'Monto',
                     data: byCat.data,
-                    backgroundColor: byCat.labels.map((_, i) => Object.values(C)[i % 8] + '99'),
-                    borderColor:     byCat.labels.map((_, i) => Object.values(C)[i % 8]),
-                    borderWidth: 1.5,
-                    borderRadius: 4,
+                    backgroundColor: byCat.colors.map(c => c + '99'),
+                    borderColor:     byCat.colors,
+                    borderWidth: 1.5, borderRadius: 3,
                 }],
             },
             options: {
                 indexAxis: 'y',
                 responsive: true, maintainAspectRatio: false,
-                animation: { duration: 700 },
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { color: GRID }, ticks: { color: TCLR, font: TFONT, callback: mFmt } },
@@ -285,17 +273,14 @@ export default function ClientFinances() {
         return () => { ['ch1', 'ch2', 'ch3', 'ch4'].forEach(destroyChart) }
     }, [finances, totals, loading])
 
-    /* ── Handlers ────────────────────────────────────────── */
+    /* ── Handlers ── */
     const handleExportPDF = async () => {
         setExporting(true)
         try {
-            const blob = await clientService.exportFinancesPDF({
-                filter, date_from: activeDR?.from ?? '', date_to: activeDR?.to ?? '',
-            })
-            const url = URL.createObjectURL(blob)
-            const a   = document.createElement('a')
-            a.href = url
-            a.download = `historial-financiero-${new Date().toISOString().slice(0, 10)}.pdf`
+            const blob = await clientService.exportFinancesPDF({ filter, date_from: activeDR?.from ?? '', date_to: activeDR?.to ?? '' })
+            const url  = URL.createObjectURL(blob)
+            const a    = document.createElement('a')
+            a.href = url; a.download = `historial-financiero-${new Date().toISOString().slice(0, 10)}.pdf`
             a.click(); URL.revokeObjectURL(url)
             setAlert({ type: 'success', msg: 'PDF descargado correctamente.' })
         } catch {
@@ -349,9 +334,7 @@ export default function ClientFinances() {
     const renderDetails = (f: FinanceItem) => {
         switch (f.type) {
             case 'investment':
-                return f.asset_name
-                    ? <div className="detail-item"><i className="fas fa-tools"></i><span>{f.asset_name}</span></div>
-                    : null
+                return f.asset_name ? <div className="detail-item"><i className="fas fa-tools"></i><span>{f.asset_name}</span></div> : null
             case 'debt':
                 return (
                     <>
@@ -376,15 +359,14 @@ export default function ClientFinances() {
                     </>
                 )
             default:
-                return <span style={{ color: 'var(--t4)', fontSize: '.75rem' }}>—</span>
+                return <span style={{ color: 'rgba(200,169,110,.3)', fontSize: '.75rem' }}>—</span>
         }
     }
 
-    /* ── JSX ─────────────────────────────────────────────── */
+    /* ══ JSX ══ */
     return (
         <div className="finance-dashboard">
 
-            {/* Alert */}
             {alert && (
                 <div className={`modern-alert ${alert.type}`}>
                     <i className={`fas ${alert.type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}`}></i>
@@ -396,7 +378,6 @@ export default function ClientFinances() {
             <div className="finance-hero">
                 <div className="finance-hero-bg" ref={heroBgRef}></div>
 
-                {/* Top: título + botón exportar */}
                 <div className="finance-hero-top">
                     <div className="finance-hero-left">
                         <div className="finance-hero-tag">Panel Financiero · AgroFinanzas</div>
@@ -405,7 +386,6 @@ export default function ClientFinances() {
                         </h1>
                         <p className="finance-hero-sub">Análisis completo de tus movimientos agropecuarios</p>
 
-                        {/* Mini-stats en el hero */}
                         <div className="finance-hero-stats">
                             <div className="hero-stat">
                                 <span className="hero-stat-label">Ingresos</span>
@@ -434,7 +414,6 @@ export default function ClientFinances() {
                     </div>
                 </div>
 
-                {/* Barra inferior: filtros + fechas */}
                 <div className="finance-hero-bar">
                     <div className="hero-filters">
                         {FILTER_OPTIONS.map(f => (
@@ -447,36 +426,18 @@ export default function ClientFinances() {
                             </button>
                         ))}
                     </div>
-
                     <div className="hero-bar-div" />
-
                     <div className="hero-dates">
                         <label><i className="fas fa-calendar-days"></i> Desde</label>
-                        <input
-                            type="date"
-                            className="date-input"
-                            value={dateFrom}
-                            onChange={e => setDateFrom(e.target.value)}
-                        />
+                        <input type="date" className="date-input" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
                         <span className="date-sep">→</span>
                         <label><i className="fas fa-calendar-days"></i> Hasta</label>
-                        <input
-                            type="date"
-                            className="date-input"
-                            value={dateTo}
-                            onChange={e => setDateTo(e.target.value)}
-                        />
-                        <button
-                            className="btn-date-apply"
-                            onClick={() => { if (dateFrom || dateTo) setActiveDR({ from: dateFrom, to: dateTo }) }}
-                        >
+                        <input type="date" className="date-input" value={dateTo} onChange={e => setDateTo(e.target.value)} />
+                        <button className="btn-date-apply" onClick={() => { if (dateFrom || dateTo) setActiveDR({ from: dateFrom, to: dateTo }) }}>
                             <i className="fas fa-magnifying-glass"></i> Filtrar
                         </button>
                         {activeDR && (
-                            <button
-                                className="btn-date-clear"
-                                onClick={() => { setDateFrom(''); setDateTo(''); setActiveDR(null) }}
-                            >
+                            <button className="btn-date-clear" onClick={() => { setDateFrom(''); setDateTo(''); setActiveDR(null) }}>
                                 <i className="fas fa-xmark"></i>
                             </button>
                         )}
@@ -487,11 +448,7 @@ export default function ClientFinances() {
             {/* ════ KPI CARDS ════ */}
             <div className="summary-grid">
                 {SUMMARY_CARDS.map((c, i) => (
-                    <div
-                        key={c.key}
-                        className={`summary-card ${c.cls}`}
-                        style={{ animationDelay: `${i * .05}s` }}
-                    >
+                    <div key={c.key} className={`summary-card ${c.cls}`} style={{ animationDelay: `${i * .05}s` }}>
                         <div className="summary-card-header">
                             <div className="summary-card-icon"><i className={`fas ${c.icon}`}></i></div>
                             {c.label}
@@ -507,15 +464,11 @@ export default function ClientFinances() {
                 ))}
             </div>
 
-            {/* ════ TABLA DE TRANSACCIONES ════ */}
+            {/* ════ TABLA ════ */}
             <div className="section-heading">
-                <span className="section-heading-tag">
-                    <i className="fas fa-table-list"></i> Historial de Transacciones
-                </span>
+                <span className="section-heading-tag"><i className="fas fa-table-list"></i> Historial de Transacciones</span>
                 <span className="section-heading-line"></span>
-                {!loading && (
-                    <span className="section-heading-count">{finances.length} registros</span>
-                )}
+                {!loading && <span className="section-heading-count">{finances.length} registros</span>}
             </div>
 
             <div className="table-container">
@@ -534,7 +487,7 @@ export default function ClientFinances() {
                         {loading ? (
                             <tr>
                                 <td colSpan={6} style={{ textAlign: 'center', padding: 60 }}>
-                                    <i className="fas fa-spinner fa-spin" style={{ fontSize: '1.8rem', color: 'var(--lime)' }}></i>
+                                    <i className="fas fa-spinner fa-spin" style={{ fontSize: '1.8rem', color: 'var(--paja)' }}></i>
                                 </td>
                             </tr>
                         ) : finances.length === 0 ? (
@@ -567,34 +520,17 @@ export default function ClientFinances() {
                                             {f.category && <span className="category-badge">{f.category}</span>}
                                         </div>
                                     </td>
-                                    <td style={{ color: 'var(--t3)', fontSize: '.81rem' }}>
-                                        {f.description ?? '—'}
-                                    </td>
+                                    <td style={{ color: 'rgba(200,169,110,.4)', fontSize: '.81rem' }}>{f.description ?? '—'}</td>
                                     <td>
                                         <div className="action-buttons">
-                                            <button
-                                                className="action-btn edit"
-                                                title="Editar"
-                                                onClick={() => openEdit(f)}
-                                            >
+                                            <button className="action-btn edit" title="Editar" onClick={() => openEdit(f)}>
                                                 <i className="fas fa-pen"></i>
                                             </button>
-                                            <button
-                                                className="action-btn delete"
-                                                title="Eliminar"
-                                                onClick={() => handleDelete(f.id)}
-                                            >
+                                            <button className="action-btn delete" title="Eliminar" onClick={() => handleDelete(f.id)}>
                                                 <i className="fas fa-trash"></i>
                                             </button>
-                                            {f.type === 'debt'
-                                                && f.paid_installments != null
-                                                && f.installments != null
-                                                && f.paid_installments < f.installments && (
-                                                <button
-                                                    className="action-btn pay"
-                                                    title="Pagar cuota"
-                                                    onClick={() => handlePayInstallment(f.id)}
-                                                >
+                                            {f.type === 'debt' && f.paid_installments != null && f.installments != null && f.paid_installments < f.installments && (
+                                                <button className="action-btn pay" title="Pagar cuota" onClick={() => handlePayInstallment(f.id)}>
                                                     <i className="fas fa-dollar-sign"></i>
                                                 </button>
                                             )}
@@ -612,10 +548,7 @@ export default function ClientFinances() {
                 <div className="analytics-header">
                     <h2 className="analytics-title">
                         <i className="fas fa-chart-bar"></i>
-                        Análisis{' '}
-                        <span style={{ fontFamily: 'var(--fs)', fontStyle: 'italic', color: 'var(--lime)', fontWeight: 400 }}>
-                            Visual
-                        </span>
+                        Análisis <em>Visual</em>
                     </h2>
                 </div>
                 <div className="charts-grid">
@@ -640,10 +573,7 @@ export default function ClientFinances() {
 
             {/* ════ MODAL EDITAR ════ */}
             {editItem && (
-                <div
-                    className="fd-overlay"
-                    onClick={e => { if (e.target === e.currentTarget) setEditItem(null) }}
-                >
+                <div className="fd-overlay" onClick={e => { if (e.target === e.currentTarget) setEditItem(null) }}>
                     <div className="fd-modal">
                         <div className="fd-modal-header">
                             <div className="fd-modal-title">
@@ -657,49 +587,24 @@ export default function ClientFinances() {
                             <div className="fd-modal-body">
                                 <div className="fd-field">
                                     <label className="fd-label">Monto</label>
-                                    <input
-                                        type="number" step="0.01" className="fd-input"
-                                        value={editAmount}
-                                        onChange={e => setEditAmount(e.target.value)}
-                                        required
-                                    />
+                                    <input type="number" step="0.01" className="fd-input" value={editAmount} onChange={e => setEditAmount(e.target.value)} required />
                                 </div>
                                 <div className="fd-field">
                                     <label className="fd-label">Fecha</label>
-                                    <input
-                                        type="date" className="fd-input"
-                                        value={editDate}
-                                        onChange={e => setEditDate(e.target.value)}
-                                        required
-                                    />
+                                    <input type="date" className="fd-input" value={editDate} onChange={e => setEditDate(e.target.value)} required />
                                 </div>
                                 <div className="fd-field">
                                     <label className="fd-label">Categoría</label>
-                                    <input
-                                        type="text" className="fd-input"
-                                        value={editCategory}
-                                        onChange={e => setEditCategory(e.target.value)}
-                                        placeholder="Opcional"
-                                    />
+                                    <input type="text" className="fd-input" value={editCategory} onChange={e => setEditCategory(e.target.value)} placeholder="Opcional" />
                                 </div>
                                 <div className="fd-field">
                                     <label className="fd-label">Descripción</label>
-                                    <textarea
-                                        className="fd-input" rows={3}
-                                        value={editDesc}
-                                        onChange={e => setEditDesc(e.target.value)}
-                                        placeholder="Opcional"
-                                        style={{ resize: 'vertical', minHeight: 74 }}
-                                    ></textarea>
+                                    <textarea className="fd-input" rows={3} value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Opcional" style={{ resize: 'vertical', minHeight: 74 }}></textarea>
                                 </div>
                             </div>
                             <div className="fd-modal-footer">
-                                <button type="button" className="fd-btn-cancel" onClick={() => setEditItem(null)}>
-                                    Cancelar
-                                </button>
-                                <button type="submit" className="fd-btn-save">
-                                    <i className="fas fa-check"></i> Guardar
-                                </button>
+                                <button type="button" className="fd-btn-cancel" onClick={() => setEditItem(null)}>Cancelar</button>
+                                <button type="submit" className="fd-btn-save"><i className="fas fa-check"></i> Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -721,13 +626,7 @@ export default function ClientFinances() {
                         <input className="calc-screen" value={calcValue} readOnly />
                         <div className="calc-grid">
                             {['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', '0', '.', '+'].map(b => (
-                                <button
-                                    key={b}
-                                    className={['/', '+', '-', '*'].includes(b) ? 'op' : ''}
-                                    onClick={() => calcPress(b)}
-                                >
-                                    {b}
-                                </button>
+                                <button key={b} className={['/', '+', '-', '*'].includes(b) ? 'op' : ''} onClick={() => calcPress(b)}>{b}</button>
                             ))}
                             <button className="equal" onClick={() => calcPress('=')}>=</button>
                             <button style={{ gridColumn: 'span 3' }} onClick={() => calcPress('C')}>C</button>

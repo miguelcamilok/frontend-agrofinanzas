@@ -1,12 +1,10 @@
 import { axiosClient } from '@shared/services/api/axiosClient'
 
-// El backend (AuthController) guarda y devuelve la foto como `profile_photo`.
-// Mantenemos avatar_url como alias por compatibilidad.
 export interface CommentUser {
     id: number
     name: string
-    profile_photo?: string    // ← campo real del backend (AuthController / User model)
-    avatar_url?: string       // alias por si algún endpoint lo serializa distinto
+    profile_photo?: string
+    avatar_url?: string
 }
 
 export interface Comment {
@@ -14,6 +12,8 @@ export interface Comment {
     user?: CommentUser | null
     content: string
     category?: string
+    media_url?: string | null
+    media_type?: string | null
     replies?: Reply[]
     replies_count?: number
     liked_by_user?: boolean
@@ -25,12 +25,15 @@ export interface Reply {
     id: number
     user?: CommentUser | null
     content: string
+    media_url?: string | null
+    media_type?: string | null
     created_at: string
 }
 
 export interface CommentPayload {
     content: string
     category?: string
+    mediaFile?: File | null   // archivo local → se envía como multipart/form-data
 }
 
 export const recommendationsService = {
@@ -39,18 +42,63 @@ export const recommendationsService = {
         const { data } = await axiosClient.get<{ comments: Comment[] }>('/comments', { params })
         return data
     },
+
+    /**
+     * Crea un comentario.
+     * - Con imagen  → FormData  (el backend lee `media_file`)
+     * - Sin imagen  → JSON plano
+     */
     async createComment(payload: CommentPayload) {
-        const { data } = await axiosClient.post<{ comment: Comment }>('/comments', payload)
+        if (payload.mediaFile) {
+            const form = new FormData()
+            form.append('content',    payload.content)
+            form.append('category',   payload.category ?? 'Recomendación')
+            form.append('media_file', payload.mediaFile)
+
+            const { data } = await axiosClient.post<{ comment: Comment }>('/comments', form, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            return data
+        }
+
+        const { data } = await axiosClient.post<{ comment: Comment }>('/comments', {
+            content:  payload.content,
+            category: payload.category ?? 'Recomendación',
+        })
         return data
     },
-    async replyToComment(commentId: number, content: string) {
-        const { data } = await axiosClient.post<{ reply: Reply }>(`/comments/${commentId}/reply`, { content })
+
+    /**
+     * Responde a un comentario.
+     * - Con imagen  → FormData  (el backend lee `media_file` en store())
+     * - Sin imagen  → JSON plano
+     */
+    async replyToComment(commentId: number, content: string, mediaFile?: File | null) {
+        if (mediaFile) {
+            const form = new FormData()
+            form.append('content',    content)
+            form.append('category',   'Opinión')   // requerido por el backend
+            form.append('media_file', mediaFile)
+
+            const { data } = await axiosClient.post<{ comment: Comment }>(
+                `/comments/${commentId}/reply`, form,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            )
+            return data
+        }
+
+        const { data } = await axiosClient.post<{ comment: Comment }>(
+            `/comments/${commentId}/reply`,
+            { content, category: 'Opinión' }
+        )
         return data
     },
+
     async likeComment(commentId: number) {
         const { data } = await axiosClient.post<{ liked: boolean }>(`/comments/${commentId}/like`)
         return data
     },
+
     async deleteComment(commentId: number) {
         await axiosClient.delete(`/comments/${commentId}`)
     },

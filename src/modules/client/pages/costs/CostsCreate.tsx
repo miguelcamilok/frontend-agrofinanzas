@@ -6,19 +6,12 @@ import '../create-forms.css'
 export default function CostsCreate() {
     const navigate = useNavigate()
     const [formData, setFormData] = useState({
-        date: '',
-        amount: '',
-        crop_name: '',
-        area: '',
-        cost_per_unit: '',
-        production_cycle: '',
-        category: '',
-        description: ''
+        date: '', amount: '', crop_name: '', area: '',
+        cost_per_unit: '', production_cycle: '', category: '', description: ''
     })
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
 
-    // Auto calculate cost per unit
     useEffect(() => {
         const a = parseFloat(formData.amount) || 0
         const ar = parseFloat(formData.area) || 0
@@ -34,8 +27,7 @@ export default function CostsCreate() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setSubmitting(true)
-        setError('')
+        setSubmitting(true); setError('')
         try {
             await clientService.createCosts({
                 date: formData.date,
@@ -50,22 +42,29 @@ export default function CostsCreate() {
             navigate('/client/finances')
         } catch {
             setError('Hubo un error al registrar los costos.')
-        } finally {
-            setSubmitting(false)
-        }
+        } finally { setSubmitting(false) }
     }
+
+    const costPerHa = formData.cost_per_unit
+        ? Number(formData.cost_per_unit).toLocaleString('es-CO', { maximumFractionDigits: 0 })
+        : null
 
     return (
         <div className="costs-container">
             <div className="costs-card">
                 <div className="costs-header">
-                    <i className="fas fa-seedling"></i> Registrar Costos de Producción
+                    <i className="fas fa-seedling"></i>
+                    Registrar Costos de Producción
                 </div>
-
                 <div className="costs-body">
-                    <div className="costs-icon">
-                        <i className="fas fa-tractor"></i>
+                    <div className="costs-icon"><i className="fas fa-tractor"></i></div>
+
+                    <div className="cf-eyebrow">
+                        <span></span> Nueva partida · Costos
                     </div>
+                    <p className="cf-subtitle">
+                        Registra los costos de cada cultivo o ciclo productivo para calcular tu rentabilidad por hectárea.
+                    </p>
 
                     {error && (
                         <div className="modern-alert error" style={{ marginBottom: 20 }}>
@@ -80,44 +79,33 @@ export default function CostsCreate() {
                                     <i className="fas fa-calendar-alt"></i> Fecha *
                                 </label>
                                 <input
-                                    type="date"
-                                    name="date"
-                                    id="costs_date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    required
+                                    type="date" name="date" id="costs_date"
+                                    value={formData.date} onChange={handleChange} required
                                 />
                             </div>
-
                             <div className="form-group-costs">
                                 <label htmlFor="costs_amount">
                                     <i className="fas fa-dollar-sign"></i> Costo total *
                                 </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    name="amount"
-                                    id="costs_amount"
-                                    placeholder="Ej: 2500000"
-                                    value={formData.amount}
-                                    onChange={handleChange}
-                                    required
-                                />
+                                <div className="cf-input-wrap">
+                                    <span className="cf-input-prefix">$</span>
+                                    <input
+                                        type="number" step="0.01" name="amount" id="costs_amount"
+                                        placeholder="0.00" value={formData.amount}
+                                        onChange={handleChange} required className="cf-has-prefix"
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         <div className="form-group-costs">
                             <label htmlFor="costs_crop">
-                                <i className="fas fa-leaf"></i> Cultivo/Producción *
+                                <i className="fas fa-leaf"></i> Cultivo / Producción *
                             </label>
                             <input
-                                type="text"
-                                name="crop_name"
-                                id="costs_crop"
-                                placeholder="Ej: Maíz"
-                                value={formData.crop_name}
-                                onChange={handleChange}
-                                required
+                                type="text" name="crop_name" id="costs_crop"
+                                placeholder="Ej: Maíz, Café, Aguacate Hass..."
+                                value={formData.crop_name} onChange={handleChange} required
                             />
                         </div>
 
@@ -127,43 +115,38 @@ export default function CostsCreate() {
                                     <i className="fas fa-map"></i> Área (hectáreas)
                                 </label>
                                 <input
-                                    type="number"
-                                    step="0.01"
-                                    name="area"
-                                    id="costs_area"
-                                    placeholder="Ej: 5"
-                                    value={formData.area}
-                                    onChange={handleChange}
+                                    type="number" step="0.01" name="area" id="costs_area"
+                                    placeholder="Ej: 5" value={formData.area} onChange={handleChange}
                                 />
                             </div>
-
                             <div className="form-group-costs">
                                 <label htmlFor="costs_per_unit">
-                                    <i className="fas fa-calculator"></i> Costo/Hectárea
+                                    <i className="fas fa-calculator"></i> Costo / Hectárea
                                 </label>
                                 <input
-                                    type="number"
-                                    step="0.01"
-                                    name="cost_per_unit"
-                                    id="costs_per_unit"
-                                    placeholder="Ej: 500000"
-                                    value={formData.cost_per_unit}
+                                    type="number" step="0.01" name="cost_per_unit" id="costs_per_unit"
+                                    placeholder="Auto-calculado" value={formData.cost_per_unit}
                                     onChange={handleChange}
                                 />
                             </div>
                         </div>
+
+                        {costPerHa && (
+                            <div className="cf-calc-pill cf-calc-pill--tierra">
+                                <i className="fas fa-seedling"></i>
+                                Costo por hectárea: <strong>${costPerHa}</strong>
+                                <span className="cf-calc-badge">auto</span>
+                            </div>
+                        )}
 
                         <div className="form-group-costs">
                             <label htmlFor="costs_cycle">
                                 <i className="fas fa-sync-alt"></i> Ciclo de producción
                             </label>
                             <input
-                                type="text"
-                                name="production_cycle"
-                                id="costs_cycle"
-                                placeholder="Ej: Semestre A 2024"
-                                value={formData.production_cycle}
-                                onChange={handleChange}
+                                type="text" name="production_cycle" id="costs_cycle"
+                                placeholder="Ej: Semestre A 2024 / Cosecha principal"
+                                value={formData.production_cycle} onChange={handleChange}
                             />
                         </div>
 
@@ -171,12 +154,8 @@ export default function CostsCreate() {
                             <label htmlFor="costs_category">
                                 <i className="fas fa-tag"></i> Tipo de costo
                             </label>
-                            <select
-                                name="category"
-                                id="costs_category"
-                                value={formData.category}
-                                onChange={handleChange}
-                            >
+                            <select name="category" id="costs_category"
+                                value={formData.category} onChange={handleChange}>
                                 <option value="">Seleccionar...</option>
                                 <option value="Semillas">Semillas</option>
                                 <option value="Fertilizante">Fertilizante</option>
@@ -193,21 +172,16 @@ export default function CostsCreate() {
                                 <i className="fas fa-align-left"></i> Descripción
                             </label>
                             <textarea
-                                name="description"
-                                id="costs_description"
-                                placeholder="Ej: Costos de siembra y preparación del terreno"
-                                rows={3}
-                                value={formData.description}
-                                onChange={handleChange}
+                                name="description" id="costs_description"
+                                placeholder="Ej: Costos de siembra y preparación del terreno para la primera cosecha..."
+                                rows={3} value={formData.description} onChange={handleChange}
                             ></textarea>
                         </div>
 
                         <button type="submit" className="btn-costs-submit" disabled={submitting}>
-                            {submitting ? (
-                                <><i className="fas fa-spinner fa-spin"></i> Guardando...</>
-                            ) : (
-                                <><i className="fas fa-save"></i> Guardar Costos</>
-                            )}
+                            {submitting
+                                ? <><i className="fas fa-spinner fa-spin"></i> Guardando...</>
+                                : <><i className="fas fa-floppy-disk"></i> Guardar Costos</>}
                         </button>
                     </form>
                 </div>

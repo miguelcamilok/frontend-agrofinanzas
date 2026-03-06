@@ -1,408 +1,451 @@
-/* ── Shared Create Form Styles ── */
-.income-container,
-.expense-container,
-.investment-container,
-.debt-container,
-.inventory-container,
-.costs-container {
-    max-width: 650px;
-    margin: 120px auto 50px;
-    padding: 0 20px;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+
+/* ═══════════════════════════════════════
+   TOKENS — Paleta Tierra & Campo (Tema Crema)
+═══════════════════════════════════════ */
+:root {
+  --tierra:       #6B3D14;
+  --tierra-d:     #4a2a0d;
+  --tierra-xl:    rgba(107,61,20,.06);
+  --tierra-sm:    rgba(107,61,20,.12);
+  --barro:        #A0522D;
+  --paja:         #C8A96E;
+  --paja-dim:     rgba(200,169,110,.30);
+  --crema:        #F5EDD6;
+  --crema-2:      #EFE3C4;
+  --crema-3:      #E6D5AA;
+  --pasto:        #4A7C3F;
+  --hoja:         #7AAF5A;
+  --hoja-dim:     rgba(122,175,90,.14);
+  --cielo:        #5B8DB8;
+  --noche:        #1C2B1A;
+  --noche-2:      #243322;
+  --acento:       #D4841A;
+  --acento-dim:   rgba(212,132,26,.14);
+  --rojo:         #c0392b;
+  --rojo-dim:     rgba(192,57,43,.08);
+
+  --sombra:       rgba(107,61,20,.07);
+  --sombra-md:    rgba(107,61,20,.13);
+  --sombra-lg:    rgba(107,61,20,.18);
+  --borde:        rgba(200,169,110,.45);
+  --borde-hi:     rgba(200,169,110,.70);
+  --borde-dark:   rgba(107,61,20,.18);
 }
 
-.income-container,
-.expense-container {
-    max-width: 600px;
+/* ═══════════════════════════════════════
+   FONDO BASE — Foto campo con overlay crema cálido
+═══════════════════════════════════════ */
+.cf-root,
+.income-container, .expense-container,
+.investment-container, .debt-container,
+.costs-container, .inventory-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px 60px;
+  position: relative;
+  font-family: 'Source Sans 3', sans-serif;
 }
 
-.income-card,
-.expense-card,
-.investment-card,
-.debt-card,
-.inventory-card,
-.costs-card {
-    background: #1a1a1a;
-    border-radius: 12px;
-    overflow: hidden;
+/* Imagen de fondo */
+.income-container::before, .expense-container::before,
+.investment-container::before, .debt-container::before,
+.costs-container::before, .inventory-container::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    url('https://upload.wikimedia.org/wikipedia/commons/2/20/Nevado_del_Ruiz_nos_saludo_4.jpg')
+    center/cover no-repeat;
 }
 
-.income-card {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(138, 201, 38, 0.2);
+/* Overlay cálido — foto visible, armonizada con paleta crema */
+.income-container::after, .expense-container::after,
+.investment-container::after, .debt-container::after,
+.costs-container::after, .inventory-container::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    linear-gradient(
+      158deg,
+      rgba(245,237,214,.72) 0%,
+      rgba(200,169,110,.55) 30%,
+      rgba(107,61,20,.45) 65%,
+      rgba(28,43,26,.60) 100%
+    );
 }
 
-.expense-card {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 107, 107, 0.2);
+/* ═══════════════════════════════════════
+   TARJETA FORMULARIO
+═══════════════════════════════════════ */
+.income-card, .expense-card, .investment-card,
+.debt-card, .costs-card, .inventory-card {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 580px;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 0 var(--crema-3),
+    0 6px 24px var(--sombra),
+    0 20px 48px var(--sombra-md);
+  animation: cfSlideUp .45s cubic-bezier(.16,1,.3,1) both;
 }
 
-.investment-card {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.2);
+@keyframes cfSlideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: none; }
 }
 
-.debt-card {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.2);
+/* ── Cabecera de la tarjeta ── */
+.income-header, .expense-header, .investment-header,
+.debt-header, .costs-header, .inventory-header {
+  padding: 22px 28px;
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem; font-weight: 700; color: #fff;
+  border-bottom: 1px solid var(--borde-dark);
+  position: relative; overflow: hidden;
 }
 
-.inventory-card {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(168, 85, 247, 0.2);
+/* Color sólido y elegante por tipo */
+.income-header     { background: var(--pasto); }
+.expense-header    { background: var(--rojo); }
+.investment-header { background: var(--cielo); }
+.debt-header       { background: var(--acento); color: var(--noche); }
+.costs-header      { background: var(--tierra); }
+.inventory-header  { background: var(--noche); }
+
+.income-header i     { color: rgba(255,255,255,.75); }
+.expense-header i    { color: rgba(255,255,255,.75); }
+.investment-header i { color: rgba(255,255,255,.75); }
+.debt-header i       { color: rgba(28,43,26,.55); }
+.costs-header i      { color: var(--paja); }
+.inventory-header i  { color: var(--hoja); }
+
+/* Línea dorada decorativa bajo cabecera */
+.income-header::after, .expense-header::after,
+.investment-header::after, .debt-header::after,
+.costs-header::after, .inventory-header::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--paja) 30%, var(--crema-3) 70%, transparent 100%);
+  opacity: .55;
 }
 
-.costs-card {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(20, 184, 166, 0.2);
+/* ── Cuerpo ── */
+.income-body, .expense-body, .investment-body,
+.debt-body, .costs-body, .inventory-body {
+  padding: 28px;
+  background: #fff;
 }
 
-/* Headers */
-.income-header,
-.expense-header,
-.investment-header,
-.debt-header,
-.inventory-header,
-.costs-header {
-    padding: 25px 30px;
-    font-weight: 700;
-    font-size: 1.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+/* ── Icono decorativo ── */
+.income-icon, .expense-icon, .investment-icon,
+.debt-icon, .costs-icon, .inventory-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin: 0 auto 22px;
+  border: 2px solid var(--borde);
+}
+.income-icon     { background: rgba(74,124,63,.08);   color: var(--pasto); }
+.expense-icon    { background: rgba(192,57,43,.07);   color: var(--rojo); }
+.investment-icon { background: rgba(91,141,184,.10);  color: var(--cielo); }
+.debt-icon       { background: var(--acento-dim);     color: var(--acento); }
+.costs-icon      { background: var(--tierra-xl);      color: var(--tierra); }
+.inventory-icon  { background: rgba(28,43,26,.06);    color: var(--noche); }
+
+/* ═══════════════════════════════════════
+   AVISO GANADO (inventory)
+═══════════════════════════════════════ */
+.cattle-notice {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 16px; margin-bottom: 20px;
+  background: rgba(212,132,26,.06);
+  border: 1px solid rgba(212,132,26,.28);
+  border-radius: 3px;
+  font-size: .8rem; color: var(--barro); line-height: 1.55;
+}
+.cattle-notice i { color: var(--acento); flex-shrink: 0; margin-top: 2px; }
+.cattle-notice a { color: var(--tierra); font-weight: 700; }
+.cattle-notice a:hover { color: var(--barro); }
+
+/* ═══════════════════════════════════════
+   GRUPOS DE CAMPO
+═══════════════════════════════════════ */
+.form-group-income, .form-group-expense,
+.form-group-investment, .form-group-debt,
+.form-group-costs, .form-group-inventory {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 16px;
 }
 
-.income-header {
-    background: linear-gradient(135deg, #8ac926, #a8e05f);
-    color: #0b0f0c;
-    box-shadow: 0 4px 12px rgba(138, 201, 38, 0.3);
+.form-group-income label, .form-group-expense label,
+.form-group-investment label, .form-group-debt label,
+.form-group-costs label, .form-group-inventory label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+  color: var(--barro);
 }
 
-.expense-header {
-    background: linear-gradient(135deg, #ff6b6b, #ff8787);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+.form-group-income label i, .form-group-expense label i,
+.form-group-investment label i, .form-group-debt label i,
+.form-group-costs label i, .form-group-inventory label i {
+  color: var(--paja); font-size: .65rem;
 }
 
-.investment-header {
-    background: linear-gradient(135deg, #3b82f6, #60a5fa);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+/* Inputs & Selects & Textareas */
+.form-group-income input, .form-group-income textarea,
+.form-group-expense input, .form-group-expense textarea,
+.form-group-investment input, .form-group-investment textarea, .form-group-investment select,
+.form-group-debt input, .form-group-debt textarea, .form-group-debt select,
+.form-group-costs input, .form-group-costs textarea, .form-group-costs select,
+.form-group-inventory input, .form-group-inventory textarea, .form-group-inventory select {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--crema);
+  border: 1px solid var(--borde);
+  border-radius: 3px;
+  color: var(--noche);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .9rem;
+  outline: none;
+  transition: border-color .22s, box-shadow .22s, background .22s;
+  resize: none;
 }
 
-.debt-header {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    color: #000;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+.form-group-income input::placeholder,
+.form-group-expense input::placeholder,
+.form-group-investment input::placeholder,
+.form-group-debt input::placeholder,
+.form-group-costs input::placeholder,
+.form-group-inventory input::placeholder,
+textarea::placeholder {
+  color: rgba(107,61,20,.28);
+  font-style: italic;
 }
 
-.inventory-header {
-    background: linear-gradient(135deg, #a855f7, #c084fc);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+.form-group-income input:focus, .form-group-income textarea:focus,
+.form-group-expense input:focus, .form-group-expense textarea:focus,
+.form-group-investment input:focus, .form-group-investment textarea:focus, .form-group-investment select:focus,
+.form-group-debt input:focus, .form-group-debt textarea:focus, .form-group-debt select:focus,
+.form-group-costs input:focus, .form-group-costs textarea:focus, .form-group-costs select:focus,
+.form-group-inventory input:focus, .form-group-inventory textarea:focus, .form-group-inventory select:focus {
+  border-color: var(--paja);
+  box-shadow: 0 0 0 3px rgba(200,169,110,.20);
+  background: #fff;
 }
 
-.costs-header {
-    background: linear-gradient(135deg, #14b8a6, #2dd4bf);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
-}
+select option { background: #fff; color: var(--noche); }
 
-/* Bodies */
-.income-body,
-.expense-body,
-.investment-body,
-.debt-body,
-.inventory-body,
-.costs-body {
-    padding: 35px 30px;
-}
-
-/* Form groups */
-.form-group-income,
-.form-group-expense,
-.form-group-investment,
-.form-group-debt,
-.form-group-inventory,
-.form-group-costs {
-    margin-bottom: 25px;
-}
-
-.form-group-debt,
-.form-group-inventory,
-.form-group-costs {
-    margin-bottom: 20px;
-}
-
-.form-group-income label,
-.form-group-expense label,
-.form-group-investment label,
-.form-group-debt label,
-.form-group-inventory label,
-.form-group-costs label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.form-group-income label {
-    color: #a8e05f;
-}
-
-.form-group-expense label {
-    color: #ff8787;
-}
-
-.form-group-investment label {
-    color: #60a5fa;
-}
-
-.form-group-debt label {
-    color: #fbbf24;
-}
-
-.form-group-inventory label {
-    color: #c084fc;
-}
-
-.form-group-costs label {
-    color: #2dd4bf;
-}
-
-.form-group-income input,
-.form-group-income textarea,
-.form-group-expense input,
-.form-group-expense textarea,
-.form-group-investment input,
-.form-group-investment textarea,
-.form-group-investment select,
-.form-group-debt input,
-.form-group-debt textarea,
-.form-group-debt select,
-.form-group-inventory input,
-.form-group-inventory textarea,
-.form-group-inventory select,
-.form-group-costs input,
-.form-group-costs textarea,
-.form-group-costs select {
-    width: 100%;
-    padding: 14px;
-    border-radius: 8px;
-    border: 2px solid #333;
-    background-color: #282828;
-    color: #fff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-}
-
-.form-group-income input:focus,
-.form-group-income textarea:focus {
-    border-color: #8ac926;
-    outline: none;
-    box-shadow: 0 0 10px rgba(138, 201, 38, 0.4);
-    background-color: #2a2a2a;
-}
-
-.form-group-expense input:focus,
-.form-group-expense textarea:focus {
-    border-color: #ff6b6b;
-    outline: none;
-    box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
-    background-color: #2a2a2a;
-}
-
-.form-group-investment input:focus,
-.form-group-investment textarea:focus,
-.form-group-investment select:focus {
-    border-color: #3b82f6;
-    outline: none;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-    background-color: #2a2a2a;
-}
-
-.form-group-debt input:focus,
-.form-group-debt textarea:focus,
-.form-group-debt select:focus {
-    border-color: #f59e0b;
-    outline: none;
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
-    background-color: #2a2a2a;
-}
-
-.form-group-inventory input:focus,
-.form-group-inventory select:focus,
-.form-group-inventory textarea:focus {
-    border-color: #a855f7;
-    outline: none;
-    box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
-    background-color: #2a2a2a;
-}
-
-.form-group-costs input:focus,
-.form-group-costs select:focus {
-    border-color: #14b8a6;
-    outline: none;
-    box-shadow: 0 0 10px rgba(20, 184, 166, 0.4);
-    background-color: #2a2a2a;
-}
-
-.form-group-income textarea,
-.form-group-expense textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-.form-group-inventory select option {
-    background: #1a1a1a;
-}
-
+/* ── Fila 2 columnas ── */
 .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
 }
 
-/* Submit buttons */
-.btn-income-submit,
-.btn-expense-submit,
-.btn-investment-submit,
-.btn-debt-submit,
-.btn-inventory-submit,
-.btn-costs-submit {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
+/* ═══════════════════════════════════════
+   BOTONES SUBMIT POR TIPO
+═══════════════════════════════════════ */
+.btn-income-submit, .btn-expense-submit,
+.btn-investment-submit, .btn-debt-submit,
+.btn-costs-submit, .btn-inventory-submit {
+  width: 100%; padding: 13px 24px; margin-top: 8px;
+  border: none; border-radius: 3px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .88rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  cursor: pointer; transition: all .25s;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
 }
 
 .btn-income-submit {
-    background: linear-gradient(135deg, #8ac926, #a8e05f);
-    color: #0b0f0c;
-    box-shadow: 0 4px 12px rgba(138, 201, 38, 0.3);
+  background: var(--pasto); color: #fff;
+  box-shadow: 0 4px 16px rgba(74,124,63,.28);
+}
+.btn-income-submit:hover:not(:disabled) {
+  background: #3d6834; transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(74,124,63,.38);
 }
 
 .btn-expense-submit {
-    background: linear-gradient(135deg, #ff6b6b, #ff8787);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  background: var(--rojo); color: #fff;
+  box-shadow: 0 4px 16px rgba(192,57,43,.22);
+}
+.btn-expense-submit:hover:not(:disabled) {
+  background: #a93226; transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(192,57,43,.32);
 }
 
 .btn-investment-submit {
-    background: linear-gradient(135deg, #3b82f6, #60a5fa);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: var(--cielo); color: #fff;
+  box-shadow: 0 4px 16px rgba(91,141,184,.25);
+}
+.btn-investment-submit:hover:not(:disabled) {
+  background: #4a7aa8; transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(91,141,184,.38);
 }
 
 .btn-debt-submit {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    color: #000;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  background: var(--acento); color: var(--noche);
+  box-shadow: 0 4px 16px rgba(212,132,26,.28);
 }
-
-.btn-inventory-submit {
-    background: linear-gradient(135deg, #a855f7, #c084fc);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+.btn-debt-submit:hover:not(:disabled) {
+  background: #bc7416; transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212,132,26,.40);
 }
 
 .btn-costs-submit {
-    background: linear-gradient(135deg, #14b8a6, #2dd4bf);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+  background: var(--tierra); color: var(--crema);
+  box-shadow: 0 4px 16px rgba(107,61,20,.25);
+}
+.btn-costs-submit:hover:not(:disabled) {
+  background: var(--tierra-d); transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(107,61,20,.38);
 }
 
-.btn-income-submit:hover,
-.btn-expense-submit:hover,
-.btn-investment-submit:hover,
-.btn-debt-submit:hover,
-.btn-inventory-submit:hover,
-.btn-costs-submit:hover {
-    transform: translateY(-2px);
+.btn-inventory-submit {
+  background: var(--noche); color: var(--crema);
+  box-shadow: 0 4px 16px rgba(28,43,26,.20);
+}
+.btn-inventory-submit:hover:not(:disabled) {
+  background: var(--noche-2); transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(28,43,26,.30);
 }
 
-/* Icons */
-.income-icon,
-.expense-icon,
-.investment-icon,
-.debt-icon,
-.inventory-icon,
-.costs-icon {
-    text-align: center;
-    margin-bottom: 20px;
+.btn-income-submit:disabled, .btn-expense-submit:disabled,
+.btn-investment-submit:disabled, .btn-debt-submit:disabled,
+.btn-costs-submit:disabled, .btn-inventory-submit:disabled {
+  opacity: .45; cursor: not-allowed; transform: none;
 }
 
-.income-icon i {
-    font-size: 3rem;
-    color: #8ac926;
-    text-shadow: 0 0 20px rgba(138, 201, 38, 0.5);
+/* ═══════════════════════════════════════
+   ALERTAS
+═══════════════════════════════════════ */
+.modern-alert {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: 3px;
+  font-size: .83rem; font-weight: 600;
+}
+.modern-alert.error {
+  background: rgba(192,57,43,.06);
+  border: 1px solid rgba(192,57,43,.25);
+  color: var(--rojo); border-left: 3px solid var(--rojo);
+}
+.modern-alert.success {
+  background: rgba(74,124,63,.06);
+  border: 1px solid rgba(74,124,63,.25);
+  color: var(--pasto); border-left: 3px solid var(--pasto);
 }
 
-.expense-icon i {
-    font-size: 3rem;
-    color: #ff6b6b;
-    text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 560px) {
+  .income-body, .expense-body, .investment-body,
+  .debt-body, .costs-body, .inventory-body { padding: 20px 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .income-header, .expense-header, .investment-header,
+  .debt-header, .costs-header, .inventory-header { padding: 18px 20px; }
 }
 
-.investment-icon i {
-    font-size: 3rem;
-    color: #3b82f6;
-    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+/* ═══════════════════════════════════════
+   EXTRAS — eyebrow, subtitle, helpers
+═══════════════════════════════════════ */
+
+/* Eyebrow editorial */
+.cf-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: .58rem; font-weight: 700; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--barro); opacity: .75;
+  margin-bottom: 6px;
+}
+.cf-eyebrow span {
+  width: 20px; height: 1px;
+  background: linear-gradient(90deg, var(--paja), transparent);
 }
 
-.debt-icon i {
-    font-size: 3rem;
-    color: #f59e0b;
-    text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+.cf-subtitle {
+  font-family: 'Libre Baskerville', serif; font-style: italic;
+  font-size: .8rem; color: rgba(107,61,20,.45); line-height: 1.6;
+  margin-bottom: 22px;
 }
 
-.inventory-icon i {
-    font-size: 3rem;
-    color: #a855f7;
-    text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+/* Input con prefijo $ */
+.cf-input-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.cf-input-prefix {
+  position: absolute; left: 13px;
+  font-family: 'JetBrains Mono', 'Source Sans 3', monospace;
+  font-size: .88rem; font-weight: 700;
+  color: var(--barro); opacity: .5; pointer-events: none; z-index: 1;
+}
+.cf-has-prefix { padding-left: 28px !important; }
+
+/* Barra de progreso reutilizable */
+.cf-dep-info {
+  display: flex; align-items: center; gap: 10px; margin-top: 8px;
+}
+.cf-dep-info span {
+  font-size: .7rem; color: var(--barro); opacity: .6;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.cf-dep-bar {
+  flex: 1; height: 4px; background: var(--crema-3);
+  border-radius: 2px; overflow: hidden;
+}
+.cf-dep-fill {
+  height: 100%; background: linear-gradient(90deg, var(--cielo), var(--pasto));
+  border-radius: 2px; transition: width .4s ease;
+}
+.cf-dep-bar--acento .cf-dep-fill,
+.cf-dep-fill--acento {
+  background: linear-gradient(90deg, var(--acento), var(--paja)) !important;
 }
 
-.costs-icon i {
-    font-size: 3rem;
-    color: #14b8a6;
-    text-shadow: 0 0 20px rgba(20, 184, 166, 0.5);
+/* Pill calculado automáticamente */
+.cf-calc-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px; margin-bottom: 14px; border-radius: 3px;
+  background: rgba(74,124,63,.06); border: 1px solid rgba(74,124,63,.20);
+  color: var(--pasto);
+  font-size: .76rem; font-weight: 600;
+}
+.cf-calc-pill i { font-size: .7rem; }
+.cf-calc-pill strong { color: var(--pasto); font-weight: 800; }
+
+.cf-calc-pill--tierra {
+  background: var(--tierra-xl); border-color: var(--tierra-sm);
+  color: var(--tierra);
+}
+.cf-calc-pill--tierra strong { color: var(--tierra-d); }
+
+.cf-calc-badge {
+  font-size: .55rem; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; padding: 1px 6px; border-radius: 1px;
+  background: var(--crema-2); color: var(--barro);
+  border: 1px solid var(--borde-dark); margin-left: 4px;
 }
 
-/* Cattle notice */
-.cattle-notice {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(245, 158, 11, 0.08);
-    border: 1px solid rgba(245, 158, 11, 0.25);
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 24px;
-    font-size: 0.82rem;
-    color: #f59e0b;
-    line-height: 1.5;
+/* ═══════════════════════════════════════
+   DIVISOR DECORATIVO
+═══════════════════════════════════════ */
+.cf-divider {
+  height: 1px; margin: 20px 0;
+  background: linear-gradient(90deg, transparent, var(--paja-dim), transparent);
 }
 
-.cattle-notice i {
-    font-size: 1.3rem;
-    flex-shrink: 0;
+/* ═══════════════════════════════════════
+   NOTA PIE DE FORMULARIO
+═══════════════════════════════════════ */
+.cf-form-footer {
+  margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid var(--crema-3);
+  font-size: .72rem; color: var(--barro); opacity: .6;
+  display: flex; align-items: center; gap: 6px;
 }
-
-.cattle-notice a {
-    color: #fbbf24;
-    font-weight: 700;
-    text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .inventory-body,
-    .costs-body {
-        padding: 24px 18px;
-    }
-}
+.cf-form-footer i { font-size: .65rem; color: var(--paja); }

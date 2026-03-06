@@ -179,7 +179,7 @@ export function Navbar() {
                 {/* Brand */}
                 <div className="af-logo-brand-group">
                     <Link to={logoRoute} className="af-logo-link">
-                        <img src="/img/LogoAgrofinanzas.jpeg" alt="Logo" className="af-brand-logo" />
+                        <img src="/img/nvlogo.png" alt="Logo" className="af-brand-logo" />
                         <span className="af-brand-name">AgroFinanzas</span>
                     </Link>
                 </div>
