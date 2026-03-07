@@ -484,3 +484,917 @@ select option { background: #fff; color: var(--noche); }
   background: #fff;
   color: var(--noche);
 }
+/* ═══════════════════════════════════════════════════════════════
+   NUEVO LAYOUT — Panel lateral (agregar al final de create-forms.css)
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Wrapper de página completa ── */
+.cf-page-wrap {
+  min-height: 100vh;
+  position: relative;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+/* Fondo foto */
+.cf-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    url('https://upload.wikimedia.org/wikipedia/commons/2/20/Nevado_del_Ruiz_nos_saludo_4.jpg')
+    center / cover no-repeat;
+}
+
+/* Overlay cálido */
+.cf-bg-overlay {
+  position: fixed; inset: 0; z-index: 0;
+  background: linear-gradient(
+    158deg,
+    rgba(245,237,214,.72) 0%,
+    rgba(200,169,110,.55) 30%,
+    rgba(107,61,20,.45) 65%,
+    rgba(28,43,26,.60) 100%
+  );
+}
+
+.cf-page-inner {
+  position: relative; z-index: 1;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+/* ── Breadcrumb ── */
+.cf-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .5px;
+  padding: 8px 16px;
+  background: rgba(245,237,214,.18);
+  border: 1px solid rgba(200,169,110,.25);
+  border-radius: 2px;
+  backdrop-filter: blur(8px);
+}
+
+.cf-breadcrumb a {
+  color: var(--paja);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color .2s;
+}
+.cf-breadcrumb a:hover { color: var(--crema); }
+.cf-breadcrumb a i    { font-size: .65rem; }
+.cf-breadcrumb > i    { color: rgba(200,169,110,.4); font-size: .55rem; }
+.cf-breadcrumb > span { color: rgba(245,237,214,.5); }
+
+/* ── Layout 2 columnas ── */
+.cf-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 20px;
+  align-items: start;
+}
+
+.cf-form-col {
+  /* hereda el card existente */
+}
+
+/* Quitar el fondo/fixed de los containers viejos cuando están dentro del nuevo layout */
+.cf-page-wrap .income-container,
+.cf-page-wrap .expense-container,
+.cf-page-wrap .investment-container,
+.cf-page-wrap .debt-container,
+.cf-page-wrap .costs-container,
+.cf-page-wrap .inventory-container {
+  min-height: unset;
+  padding: 0;
+  background: none;
+}
+.cf-page-wrap .income-container::before,
+.cf-page-wrap .income-container::after,
+.cf-page-wrap .expense-container::before,
+.cf-page-wrap .expense-container::after {
+  display: none;
+}
+
+/* Las cards ya tienen z-index, quitarlos para el nuevo layout */
+.cf-layout .income-card,
+.cf-layout .expense-card,
+.cf-layout .investment-card,
+.cf-layout .debt-card,
+.cf-layout .costs-card,
+.cf-layout .inventory-card {
+  position: relative;
+  z-index: 1;
+  animation: cfSlideUp .45s cubic-bezier(.16,1,.3,1) both;
+}
+
+/* ════════════════════════
+   SIDEBAR
+════════════════════════ */
+.cf-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+}
+
+/* Card base del sidebar */
+.cf-sidebar-card {
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(200,169,110,.35);
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(107,61,20,.12);
+  animation: cfSlideUp .5s cubic-bezier(.16,1,.3,1) both;
+}
+.cf-sidebar-card:nth-child(2) { animation-delay: .08s; }
+.cf-sidebar-card:nth-child(3) { animation-delay: .16s; }
+
+/* Header del card sidebar */
+.cf-sidebar-card-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--barro);
+  background: var(--crema);
+  border-bottom: 1px solid rgba(200,169,110,.25);
+  position: relative;
+}
+.cf-sidebar-card-hdr i { color: var(--paja); }
+
+/* ── VISTA PREVIA EN VIVO ── */
+.cf-live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--pasto);
+  margin-left: auto;
+  box-shadow: 0 0 0 3px rgba(74,124,63,.2);
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+.cf-live-dot--red {
+  background: var(--rojo);
+  box-shadow: 0 0 0 3px rgba(192,57,43,.2);
+}
+@keyframes livePulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(74,124,63,.2); }
+  50%      { box-shadow: 0 0 0 6px rgba(74,124,63,.05); }
+}
+
+.cf-live-body { padding: 16px; }
+
+.cf-live-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--pasto);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.cf-live-amount--expense { color: var(--rojo); }
+
+.cf-live-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cf-live-meta span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .75rem;
+  color: var(--barro);
+  opacity: .75;
+}
+.cf-live-meta span i { color: var(--paja); font-size: .65rem; }
+.cf-live-desc { font-style: italic; opacity: .6 !important; }
+
+.cf-live-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 10px;
+  text-align: center;
+  color: rgba(107,61,20,.3);
+}
+.cf-live-empty i    { font-size: 1.5rem; }
+.cf-live-empty span { font-size: .75rem; line-height: 1.55; }
+
+/* ── MINI ESTADÍSTICAS ── */
+.cf-stats-grid {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cf-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cf-stat-item--full { grid-column: 1 / -1; }
+
+.cf-stat-n {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: var(--pasto);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.cf-stat-n--sm  { font-size: 1.2rem; }
+.cf-stat-n--red { color: var(--rojo); }
+
+.cf-stat-l {
+  font-size: .62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--barro);
+  opacity: .6;
+}
+
+.cf-dep-fill--red {
+  background: linear-gradient(90deg, var(--rojo), #e8735a) !important;
+}
+
+.cf-stats-loading {
+  padding: 20px 16px;
+  font-size: .75rem;
+  color: var(--barro);
+  opacity: .45;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── TIPS DEL CAMPO ── */
+.cf-tips-card {
+  border-top: 3px solid var(--pasto);
+}
+
+.cf-tip-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.cf-tip-icon {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(74,124,63,.08);
+  border: 1px solid rgba(74,124,63,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: var(--pasto);
+}
+
+.cf-tip-text {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  font-size: .8rem;
+  color: rgba(107,61,20,.65);
+  line-height: 1.65;
+}
+
+.cf-tip-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.cf-tip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(200,169,110,.3);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all .25s;
+}
+.cf-tip-dot.active {
+  background: var(--pasto);
+  width: 16px;
+  border-radius: 3px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .cf-layout {
+    grid-template-columns: 1fr;
+  }
+  .cf-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .cf-sidebar > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .cf-page-inner { padding: 20px 16px 48px; }
+  .cf-sidebar { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARD TENDENCIA — flecha + % vs mes anterior
+═══════════════════════════════════════════════════════════════ */
+.cf-trend-card {
+  border-top: 3px solid var(--paja);
+}
+
+.cf-trend-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Flecha grande + porcentaje */
+.cf-trend-arrow-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 4px;
+}
+.cf-trend-up   { background: rgba(74,124,63,.08);  border: 1px solid rgba(74,124,63,.18); }
+.cf-trend-down { background: rgba(192,57,43,.07);  border: 1px solid rgba(192,57,43,.18); }
+
+.cf-trend-arrow-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.cf-trend-up   .cf-trend-arrow-icon { color: var(--pasto); }
+.cf-trend-down .cf-trend-arrow-icon { color: var(--rojo);  }
+
+.cf-trend-pct {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.cf-trend-up   .cf-trend-pct { color: var(--pasto); }
+.cf-trend-down .cf-trend-pct { color: var(--rojo);  }
+
+/* Totales este mes vs anterior */
+.cf-trend-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 2px;
+}
+.cf-trend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cf-trend-lbl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--barro);
+}
+.cf-trend-lbl i       { font-size: .45rem; color: var(--pasto); }
+.cf-trend-lbl--dim    { opacity: .5; }
+.cf-trend-lbl--dim i  { color: var(--barro); }
+
+.cf-trend-val {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.cf-trend-val--main { color: var(--noche); }
+.cf-trend-val--dim  { color: var(--barro); opacity: .55; font-weight: 400; }
+
+/* Mini barras comparativas */
+.cf-trend-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.cf-trend-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cf-trend-bar-row > span {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--barro);
+  opacity: .6;
+  width: 24px;
+  flex-shrink: 0;
+}
+.cf-trend-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--crema-3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cf-trend-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .6s cubic-bezier(.16,1,.3,1);
+}
+.cf-trend-bar-fill--up   { background: linear-gradient(90deg, var(--pasto), var(--hoja)); }
+.cf-trend-bar-fill--down { background: linear-gradient(90deg, var(--rojo), #e8735a); }
+.cf-trend-bar-fill--prev { background: var(--crema-3); border: 1px solid var(--borde); }
+
+/* Estado vacío */
+.cf-trend-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 10px;
+  text-align: center;
+  color: rgba(107,61,20,.3);
+}
+.cf-trend-empty i    { font-size: 1.3rem; }
+.cf-trend-empty span { font-size: .75rem; line-height: 1.55; }
+/* ═══════════════════════════════════════════════════════════════
+   NUEVO LAYOUT — Panel lateral (agregar al final de create-forms.css)
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Wrapper de página completa ── */
+.cf-page-wrap {
+  min-height: 100vh;
+  position: relative;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+/* Fondo foto */
+.cf-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    url('https://upload.wikimedia.org/wikipedia/commons/2/20/Nevado_del_Ruiz_nos_saludo_4.jpg')
+    center / cover no-repeat;
+}
+
+/* Overlay cálido */
+.cf-bg-overlay {
+  position: fixed; inset: 0; z-index: 0;
+  background: linear-gradient(
+    158deg,
+    rgba(245,237,214,.72) 0%,
+    rgba(200,169,110,.55) 30%,
+    rgba(107,61,20,.45) 65%,
+    rgba(28,43,26,.60) 100%
+  );
+}
+
+.cf-page-inner {
+  position: relative; z-index: 1;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+/* ── Breadcrumb ── */
+.cf-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .5px;
+  padding: 8px 16px;
+  background: rgba(245,237,214,.18);
+  border: 1px solid rgba(200,169,110,.25);
+  border-radius: 2px;
+  backdrop-filter: blur(8px);
+}
+
+.cf-breadcrumb a {
+  color: var(--paja);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color .2s;
+}
+.cf-breadcrumb a:hover { color: var(--crema); }
+.cf-breadcrumb a i    { font-size: .65rem; }
+.cf-breadcrumb > i    { color: rgba(200,169,110,.4); font-size: .55rem; }
+.cf-breadcrumb > span { color: rgba(245,237,214,.5); }
+
+/* ── Layout 2 columnas ── */
+.cf-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 20px;
+  align-items: start;
+}
+
+.cf-form-col {
+  /* hereda el card existente */
+}
+
+/* Quitar el fondo/fixed de los containers viejos cuando están dentro del nuevo layout */
+.cf-page-wrap .income-container,
+.cf-page-wrap .expense-container,
+.cf-page-wrap .investment-container,
+.cf-page-wrap .debt-container,
+.cf-page-wrap .costs-container,
+.cf-page-wrap .inventory-container {
+  min-height: unset;
+  padding: 0;
+  background: none;
+}
+.cf-page-wrap .income-container::before,
+.cf-page-wrap .income-container::after,
+.cf-page-wrap .expense-container::before,
+.cf-page-wrap .expense-container::after {
+  display: none;
+}
+
+/* Las cards ya tienen z-index, quitarlos para el nuevo layout */
+.cf-layout .income-card,
+.cf-layout .expense-card,
+.cf-layout .investment-card,
+.cf-layout .debt-card,
+.cf-layout .costs-card,
+.cf-layout .inventory-card {
+  position: relative;
+  z-index: 1;
+  animation: cfSlideUp .45s cubic-bezier(.16,1,.3,1) both;
+}
+
+/* ════════════════════════
+   SIDEBAR
+════════════════════════ */
+.cf-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+}
+
+/* Card base del sidebar */
+.cf-sidebar-card {
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(200,169,110,.35);
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(107,61,20,.12);
+  animation: cfSlideUp .5s cubic-bezier(.16,1,.3,1) both;
+}
+.cf-sidebar-card:nth-child(2) { animation-delay: .08s; }
+.cf-sidebar-card:nth-child(3) { animation-delay: .16s; }
+
+/* Header del card sidebar */
+.cf-sidebar-card-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--barro);
+  background: var(--crema);
+  border-bottom: 1px solid rgba(200,169,110,.25);
+  position: relative;
+}
+.cf-sidebar-card-hdr i { color: var(--paja); }
+
+/* ── VISTA PREVIA EN VIVO ── */
+.cf-live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--pasto);
+  margin-left: auto;
+  box-shadow: 0 0 0 3px rgba(74,124,63,.2);
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+.cf-live-dot--red {
+  background: var(--rojo);
+  box-shadow: 0 0 0 3px rgba(192,57,43,.2);
+}
+@keyframes livePulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(74,124,63,.2); }
+  50%      { box-shadow: 0 0 0 6px rgba(74,124,63,.05); }
+}
+
+.cf-live-body { padding: 16px; }
+
+.cf-live-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--pasto);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.cf-live-amount--expense { color: var(--rojo); }
+
+.cf-live-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cf-live-meta span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .75rem;
+  color: var(--barro);
+  opacity: .75;
+}
+.cf-live-meta span i { color: var(--paja); font-size: .65rem; }
+.cf-live-desc { font-style: italic; opacity: .6 !important; }
+
+.cf-live-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 10px;
+  text-align: center;
+  color: rgba(107,61,20,.3);
+}
+.cf-live-empty i    { font-size: 1.5rem; }
+.cf-live-empty span { font-size: .75rem; line-height: 1.55; }
+
+/* ── MINI ESTADÍSTICAS ── */
+.cf-stats-grid {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cf-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cf-stat-item--full { grid-column: 1 / -1; }
+
+.cf-stat-n {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: var(--pasto);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.cf-stat-n--sm  { font-size: 1.2rem; }
+.cf-stat-n--red { color: var(--rojo); }
+
+.cf-stat-l {
+  font-size: .62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--barro);
+  opacity: .6;
+}
+
+.cf-dep-fill--red {
+  background: linear-gradient(90deg, var(--rojo), #e8735a) !important;
+}
+
+.cf-stats-loading {
+  padding: 20px 16px;
+  font-size: .75rem;
+  color: var(--barro);
+  opacity: .45;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── TIPS DEL CAMPO ── */
+.cf-tips-card {
+  border-top: 3px solid var(--pasto);
+}
+
+.cf-tip-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.cf-tip-icon {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(74,124,63,.08);
+  border: 1px solid rgba(74,124,63,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: var(--pasto);
+}
+
+.cf-tip-text {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  font-size: .8rem;
+  color: rgba(107,61,20,.65);
+  line-height: 1.65;
+}
+
+.cf-tip-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.cf-tip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(200,169,110,.3);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all .25s;
+}
+.cf-tip-dot.active {
+  background: var(--pasto);
+  width: 16px;
+  border-radius: 3px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .cf-layout {
+    grid-template-columns: 1fr;
+  }
+  .cf-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .cf-sidebar > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .cf-page-inner { padding: 20px 16px 48px; }
+  .cf-sidebar { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARD TENDENCIA — flecha + % vs mes anterior
+═══════════════════════════════════════════════════════════════ */
+.cf-trend-card {
+  border-top: 3px solid var(--paja);
+}
+
+.cf-trend-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Flecha grande + porcentaje */
+.cf-trend-arrow-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 4px;
+}
+.cf-trend-up   { background: rgba(74,124,63,.08);  border: 1px solid rgba(74,124,63,.18); }
+.cf-trend-down { background: rgba(192,57,43,.07);  border: 1px solid rgba(192,57,43,.18); }
+
+.cf-trend-arrow-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.cf-trend-up   .cf-trend-arrow-icon { color: var(--pasto); }
+.cf-trend-down .cf-trend-arrow-icon { color: var(--rojo);  }
+
+.cf-trend-pct {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.cf-trend-up   .cf-trend-pct { color: var(--pasto); }
+.cf-trend-down .cf-trend-pct { color: var(--rojo);  }
+
+/* Totales este mes vs anterior */
+.cf-trend-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 2px;
+}
+.cf-trend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cf-trend-lbl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--barro);
+}
+.cf-trend-lbl i       { font-size: .45rem; color: var(--pasto); }
+.cf-trend-lbl--dim    { opacity: .5; }
+.cf-trend-lbl--dim i  { color: var(--barro); }
+
+.cf-trend-val {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.cf-trend-val--main { color: var(--noche); }
+.cf-trend-val--dim  { color: var(--barro); opacity: .55; font-weight: 400; }
+
+/* Mini barras comparativas */
+.cf-trend-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.cf-trend-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cf-trend-bar-row > span {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--barro);
+  opacity: .6;
+  width: 24px;
+  flex-shrink: 0;
+}
+.cf-trend-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--crema-3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cf-trend-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .6s cubic-bezier(.16,1,.3,1);
+}
+.cf-trend-bar-fill--up   { background: linear-gradient(90deg, var(--pasto), var(--hoja)); }
+.cf-trend-bar-fill--down { background: linear-gradient(90deg, var(--rojo), #e8735a); }
+.cf-trend-bar-fill--prev { background: var(--crema-3); border: 1px solid var(--borde); }
+
+/* Estado vacío */
+.cf-trend-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 10px;
+  text-align: center;
+  color: rgba(107,61,20,.3);
+}
+.cf-trend-empty i    { font-size: 1.3rem; }
+.cf-trend-empty span { font-size: .75rem; line-height: 1.55; }
