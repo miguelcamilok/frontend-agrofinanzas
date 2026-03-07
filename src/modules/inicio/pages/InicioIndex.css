@@ -1032,3 +1032,354 @@
   .hero-brand h1  { font-size: 2.4rem; }
   .gsearch-box    { padding: 20px; }
 }
+/* ═══════════════════════════════════════════════════════════════
+   AMIGO GANADERO — estilos nuevos
+   Agregar al final de InicioIndex.css
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Panel principal (grid) ── */
+.ganadero-panel {
+  margin-top: 20px;
+  border: 1px solid rgba(107,61,20,.15);
+  border-radius: 3px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 32px var(--sombra-d);
+  animation: gpanelIn .3s cubic-bezier(.34,1.15,.64,1) both;
+}
+
+@keyframes gpanelIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.gpanel-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--borde);
+  background: var(--crema);
+}
+
+.gpanel-ttl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gpanel-ico-wrap {
+  width: 36px; height: 36px;
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem;
+}
+
+.gpanel-ttl h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--tierra);
+}
+
+.gpanel-cls {
+  width: 32px; height: 32px;
+  border-radius: 2px;
+  background: rgba(107,61,20,.07);
+  border: 1px solid var(--borde);
+  color: var(--barro); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .82rem; transition: all .2s;
+}
+.gpanel-cls:hover { background: rgba(107,61,20,.14); color: var(--tierra); }
+
+/* ── Loading spinner ── */
+.gp-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 24px;
+  font-size: .84rem;
+  color: var(--barro);
+  opacity: .6;
+}
+.gp-loading i { font-size: 1.1rem; }
+
+/* ── Cuerpo del panel ── */
+.gpanel-body-inner {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Bloques info ── */
+.ginfo-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ginfo-section { display: flex; flex-direction: column; gap: 6px; }
+
+.ginfo-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--barro);
+  opacity: .7;
+}
+
+.ginfo-text {
+  font-size: .84rem;
+  color: #4a3728;
+  line-height: 1.75;
+}
+
+.ginfo-tips {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ginfo-tips li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: .82rem;
+  color: #5a4838;
+  line-height: 1.65;
+}
+
+.ginfo-tips li i {
+  color: var(--pasto);
+  margin-top: 4px;
+  flex-shrink: 0;
+  font-size: .7rem;
+}
+
+/* ── Datos Banco Mundial ── */
+.gdata-block {
+  background: var(--crema);
+  border: 1px solid var(--borde);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.gdata-header {
+  padding: 9px 16px;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--tierra);
+  background: rgba(107,61,20,.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.gdata-source {
+  padding: 7px 16px;
+  font-size: .67rem;
+  color: var(--barro);
+  opacity: .6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid rgba(107,61,20,.07);
+}
+
+.gdata-table { width: 100%; border-collapse: collapse; }
+.gdata-table tr:nth-child(even) { background: rgba(107,61,20,.025); }
+
+.gd-k {
+  padding: 8px 16px;
+  font-size: .76rem;
+  color: #6b5c4e;
+  font-weight: 500;
+}
+
+.gd-v {
+  padding: 8px 16px;
+  font-size: .78rem;
+  color: var(--tierra);
+  font-weight: 700;
+  text-align: right;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* ── Fuentes ── */
+.gfuentes-block {
+  background: rgba(74,124,63,.05);
+  border: 1px solid rgba(74,124,63,.14);
+  border-radius: 2px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.gfuentes-header {
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--pasto);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.gfuentes-nota {
+  font-size: .74rem;
+  color: #6b5c4e;
+  line-height: 1.5;
+}
+
+.gfuente-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: .74rem;
+  color: #5a4838;
+  line-height: 1.55;
+}
+
+.gfuente-item i {
+  color: var(--pasto);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.gfuente-item strong { color: var(--pasto); font-weight: 700; }
+
+/* ── Cat activa en grid ── */
+.gcat.gcat-active {
+  border-left: 3px solid var(--gc, #4A7C3F);
+  padding-left: 11px;
+  background: var(--crema);
+}
+.gcat.gcat-active .gcat-icon {
+  background: var(--gb, rgba(74,124,63,.09));
+  color: var(--gc, #4A7C3F);
+}
+.gcat.gcat-active .gcat-arrow {
+  transform: rotate(90deg);
+  color: var(--gc, #4A7C3F);
+}
+
+/* ── Resultados búsqueda ── */
+.gsearch-results-wrap { margin-top: 16px; }
+
+.gsearch-status {
+  font-size: .76rem;
+  color: var(--barro);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.gsearch-status strong { color: var(--tierra); }
+
+/* Acordeón resultado */
+.gresult {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 2px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px var(--sombra);
+  animation: fadeUp .25s ease both;
+  transition: border-color .2s;
+}
+.gresult.gresult-open { border-color: rgba(107,61,20,.2); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.gresult-hd {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.gresult-hd:hover { background: var(--crema); }
+
+.gresult-ico {
+  width: 36px; height: 36px;
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .88rem;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+
+.gresult-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gresult-ttl { font-size: .85rem; font-weight: 600; color: var(--noche); }
+
+.gresult-ttl mark,
+.gmark {
+  background: rgba(212,132,26,.2);
+  color: var(--tierra);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.gresult-grp {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Botón "Ver datos" */
+.gresult-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 2px;
+  border: 1px solid var(--borde);
+  background: transparent;
+  color: var(--barro);
+  cursor: pointer;
+  font-family: 'Source Sans 3', sans-serif;
+  transition: all .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.gresult-btn:hover,
+.gresult-btn.active {
+  background: var(--hoja-dim);
+  border-color: rgba(74,124,63,.35);
+  color: var(--pasto);
+}
+
+.gresult-chev {
+  font-size: .6rem;
+  transition: transform .25s ease;
+}
+.gresult-chev.open { transform: rotate(180deg); }
+
+/* Cuerpo desplegable del resultado */
+.gresult-body {
+  animation: gpanelIn .22s ease both;
+}
