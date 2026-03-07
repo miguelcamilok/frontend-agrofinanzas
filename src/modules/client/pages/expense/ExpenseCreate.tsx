@@ -78,7 +78,7 @@ export default function ExpenseCreate() {
       ? stats.total > 0 ? 100 : 0
       : Math.round(((stats.total - stats.prevTotal) / stats.prevTotal) * 100)
     : 0
-  const up    = pct <= 0   // para gastos: bajar es bueno (flecha abajo = bueno)
+  // para gastos: bajar es bueno (flecha abajo = bueno)
   const noRef = stats?.prevTotal === 0 && stats?.total === 0
 
   return (
