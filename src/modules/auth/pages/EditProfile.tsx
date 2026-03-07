@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@shared/context/AuthContext'
 import { axiosClient } from '@shared/services/api/axiosClient'
 import './EditProfile.css'
+import { recommendationsService } from '@modules/recommendations/services/recommendationsService'
 
 interface Tip {
     field: string; icon: string; title: string; desc: string
@@ -21,24 +22,37 @@ export default function EditProfile() {
     const { user, updateUser, logout } = useAuth()
     const navigate = useNavigate()
 
-    const [name, setName]           = useState('')
-    const [email, setEmail]         = useState('')
-    const [phone, setPhone]         = useState('')
-    const [birthDate, setBirthDate] = useState('')
-    const [gender, setGender]       = useState('')
-    const [experience, setExperience] = useState('')
-    const [photoFile, setPhotoFile]   = useState<File | null>(null)
+    // ── Formulario ──
+    const [name, setName]                 = useState('')
+    const [email, setEmail]               = useState('')
+    const [phone, setPhone]               = useState('')
+    const [birthDate, setBirthDate]       = useState('')
+    const [gender, setGender]             = useState('')
+    const [experience, setExperience]     = useState('')
+    const [photoFile, setPhotoFile]       = useState<File | null>(null)
     const [photoPreview, setPhotoPreview] = useState(user?.profile_photo || '/img/foto_perfil.jpg')
-    const [submitting, setSubmitting] = useState(false)
-    const [successMsg, setSuccessMsg] = useState('')
-    const [errorMsg, setErrorMsg]     = useState('')
-    const [activeTip, setActiveTip]   = useState('name')
+    const [submitting, setSubmitting]     = useState(false)
+    const [successMsg, setSuccessMsg]     = useState('')
+    const [errorMsg, setErrorMsg]         = useState('')
+    const [activeTip, setActiveTip]       = useState('name')
 
+    // ── Likes carrusel ──
+    const [likedRecs, setLikedRecs]     = useState<any[]>([])
+    const [carouselIdx, setCarouselIdx] = useState(0)
+
+    // ── Eliminar cuenta ──
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const [deleteCodeSent, setDeleteCodeSent]       = useState(false)
     const [deleteDigits, setDeleteDigits]           = useState(['', '', '', '', '', ''])
     const [deleteSending, setDeleteSending]         = useState(false)
     const deleteDigitRefs = useRef<(HTMLInputElement | null)[]>([])
+
+    // ── Efectos ──
+    useEffect(() => {
+        recommendationsService.getLikedRecommendations()
+            .then(data => setLikedRecs(data))
+            .catch(() => {})
+    }, [])
 
     useEffect(() => {
         if (user) {
@@ -52,6 +66,7 @@ export default function EditProfile() {
         }
     }, [user])
 
+    // ── Handlers ──
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
@@ -132,6 +147,7 @@ export default function EditProfile() {
         }
     }, [deleteDigits, user, logout, navigate])
 
+    // ── Helpers ──
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() - 1)
 
@@ -145,7 +161,8 @@ export default function EditProfile() {
 
     return (
         <div className="ep-root">
-            {/* Fondo textura campo */}
+
+            {/* ══ FONDO ══ */}
             <div className="ep-bg">
                 <div className="ep-bg__field"></div>
                 <div className="ep-bg__overlay"></div>
@@ -154,10 +171,9 @@ export default function EditProfile() {
 
             <div className="ep-layout">
 
-                {/* ══ COLUMNA IZQUIERDA — Avatar + Tips ══ */}
+                {/* ══ SIDEBAR ══ */}
                 <aside className="ep-sidebar">
 
-                    {/* Tarjeta de perfil */}
                     <div className="ep-profile-card">
                         <div className="ep-avatar-wrap">
                             <div className="ep-avatar">
@@ -175,7 +191,6 @@ export default function EditProfile() {
                                 style={{ display: 'none' }} onChange={handlePhotoChange}
                             />
                         </div>
-
                         <div className="ep-profile-card__info">
                             <h2 className="ep-profile-card__name">{user?.name || 'Productor'}</h2>
                             <span className="ep-profile-card__email">{user?.email || ''}</span>
@@ -186,14 +201,12 @@ export default function EditProfile() {
                                 </div>
                             )}
                         </div>
-
                         <p className="ep-avatar-hint">
                             <i className="fas fa-circle-info"></i>
                             JPG o PNG · Máx 2 MB
                         </p>
                     </div>
 
-                    {/* Tips dinámicos */}
                     <div className="ep-tip-card">
                         <div className="ep-tip-card__header">
                             <i className="fas fa-lightbulb"></i>
@@ -208,7 +221,6 @@ export default function EditProfile() {
                                 <p>{activeTipData.desc}</p>
                             </div>
                         )}
-                        {/* Indicadores de campo */}
                         <div className="ep-tip-card__dots">
                             {TIPS.map(t => (
                                 <span
@@ -220,7 +232,6 @@ export default function EditProfile() {
                         </div>
                     </div>
 
-                    {/* Tips list compacto */}
                     <div className="ep-tips-list">
                         {TIPS.map(tip => (
                             <div
@@ -238,10 +249,10 @@ export default function EditProfile() {
                     </div>
                 </aside>
 
-                {/* ══ COLUMNA DERECHA — Formulario ══ */}
+                {/* ══ MAIN ══ */}
                 <main className="ep-main">
 
-                    {/* Encabezado editorial */}
+                    {/* 1. Encabezado */}
                     <div className="ep-main__header">
                         <div className="ep-main__eyebrow">
                             <span></span>
@@ -255,7 +266,7 @@ export default function EditProfile() {
                         </p>
                     </div>
 
-                    {/* Alertas */}
+                    {/* 2. Alertas */}
                     {successMsg && (
                         <div className="ep-alert ep-alert--success">
                             <i className="fas fa-circle-check"></i>
@@ -269,15 +280,13 @@ export default function EditProfile() {
                         </div>
                     )}
 
-                    {/* Formulario */}
+                    {/* 3. Formulario */}
                     <form className="ep-form" onSubmit={handleSubmit}>
 
-                        {/* Sección — Información personal */}
                         <div className="ep-section">
                             <div className="ep-section__label">
                                 <i className="fas fa-id-card"></i> Información personal
                             </div>
-
                             <div className="ep-field" onFocus={() => setActiveTip('name')}>
                                 <label className="ep-label">
                                     <i className="fas fa-user"></i> Nombre completo
@@ -289,7 +298,6 @@ export default function EditProfile() {
                                     value={name} onChange={e => setName(e.target.value)}
                                 />
                             </div>
-
                             <div className="ep-row">
                                 <div className="ep-field" onFocus={() => setActiveTip('birth_date')}>
                                     <label className="ep-label">
@@ -317,12 +325,10 @@ export default function EditProfile() {
                             </div>
                         </div>
 
-                        {/* Sección — Contacto */}
                         <div className="ep-section">
                             <div className="ep-section__label">
                                 <i className="fas fa-address-book"></i> Contacto
                             </div>
-
                             <div className="ep-field" onFocus={() => setActiveTip('email')}>
                                 <label className="ep-label">
                                     <i className="fas fa-envelope"></i> Correo electrónico
@@ -334,7 +340,6 @@ export default function EditProfile() {
                                     value={email} onChange={e => setEmail(e.target.value)}
                                 />
                             </div>
-
                             <div className="ep-field" onFocus={() => setActiveTip('phone')}>
                                 <label className="ep-label">
                                     <i className="fas fa-phone"></i> Teléfono
@@ -348,12 +353,10 @@ export default function EditProfile() {
                             </div>
                         </div>
 
-                        {/* Sección — Experiencia */}
                         <div className="ep-section">
                             <div className="ep-section__label">
                                 <i className="fas fa-wheat-awn"></i> Experiencia agrícola
                             </div>
-
                             <div className="ep-field ep-field--experience" onFocus={() => setActiveTip('experience_years')}>
                                 <label className="ep-label">
                                     <i className="fas fa-seedling"></i> Años trabajando el campo
@@ -374,7 +377,7 @@ export default function EditProfile() {
                                     </div>
                                     <span className="ep-exp-label">
                                         {!experience || experience === '0' ? 'Sin experiencia registrada'
-                                            : parseInt(experience) < 3 ? 'Productor nuevo'
+                                            : parseInt(experience) < 3  ? 'Productor nuevo'
                                             : parseInt(experience) < 10 ? 'Productor con experiencia'
                                             : parseInt(experience) < 25 ? 'Productor veterano'
                                             : 'Maestro del campo'}
@@ -383,7 +386,6 @@ export default function EditProfile() {
                             </div>
                         </div>
 
-                        {/* Botón guardar */}
                         <button type="submit" className="ep-submit" disabled={submitting}>
                             {submitting
                                 ? <><i className="fas fa-spinner fa-spin"></i> Guardando cambios...</>
@@ -391,13 +393,12 @@ export default function EditProfile() {
                         </button>
                     </form>
 
-                    {/* ══ Zona de Peligro ══ */}
+                    {/* 4. Zona de peligro */}
                     <div className="ep-danger">
                         <div className="ep-danger__header">
                             <i className="fas fa-triangle-exclamation"></i>
                             <span>Zona de peligro</span>
                         </div>
-
                         {!deleteCodeSent ? (
                             <>
                                 <p className="ep-danger__desc">
@@ -445,6 +446,54 @@ export default function EditProfile() {
                             </>
                         )}
                     </div>
+
+                    {/* 5. Carrusel de likes — debajo de zona de peligro ══ */}
+                    {likedRecs.length > 0 && (
+                        <div className="ep-likes-section">
+                            <div className="ep-likes-header">
+                                <div className="ep-likes-title">
+                                    <i className="fas fa-heart"></i>
+                                    Publicaciones que te gustaron
+                                </div>
+                                <button
+                                    className="ep-likes-verall"
+                                    onClick={() => navigate('/editar-perfil/likes')}
+                                >
+                                    Ver todas <i className="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+
+                            <div className="ep-likes-carousel">
+                                {likedRecs.slice(0, 10).map((rec, i) => (
+                                    <div
+                                        key={rec.id}
+                                        className={`ep-like-card ${i === carouselIdx ? 'active' : ''}`}
+                                        onClick={() => setCarouselIdx(i)}
+                                    >
+                                        <div className="ep-like-card__cat">{rec.category}</div>
+                                        <p className="ep-like-card__text">
+                                            {rec.content?.slice(0, 80)}{rec.content?.length > 80 ? '…' : ''}
+                                        </p>
+                                        <div className="ep-like-card__author">
+                                            <i className="fas fa-user-circle"></i>
+                                            {rec.user?.name || 'Anónimo'}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="ep-likes-dots">
+                                {likedRecs.slice(0, 10).map((_, i) => (
+                                    <span
+                                        key={i}
+                                        className={`ep-likes-dot ${i === carouselIdx ? 'active' : ''}`}
+                                        onClick={() => setCarouselIdx(i)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                 </main>
             </div>
 
