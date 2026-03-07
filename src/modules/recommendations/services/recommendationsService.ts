@@ -102,4 +102,10 @@ export const recommendationsService = {
     async deleteComment(commentId: number) {
         await axiosClient.delete(`/comments/${commentId}`)
     },
+    async getLikedRecommendations() {
+    const { data } = await axiosClient.get<{
+        liked_recommendations: Comment[]
+    }>('/recommendations/liked')
+    return data.liked_recommendations ?? []
+},
 }

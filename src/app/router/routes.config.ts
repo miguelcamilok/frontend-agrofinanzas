@@ -77,6 +77,12 @@ export const routes: RouteConfig[] = [
         protected: true,
     },
     {
+        path: '/editar-perfil/likes',
+        component: lazy(() => import('@modules/recommendations/pages/LikedRecommendations')),
+        layout: 'main',
+        protected: true,
+    },
+    {
         path: '/recommendations',
         component: lazy(() => import('@modules/recommendations/pages/RecommendationsIndex')),
         layout: 'main',
