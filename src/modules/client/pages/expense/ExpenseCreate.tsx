@@ -5,11 +5,18 @@ import '../create-forms.css'
 
 export default function ExpenseCreate() {
     const navigate = useNavigate()
-    const [formData, setFormData] = useState({ amount: '', date: '', description: '' })
+    const [formData, setFormData] = useState({
+        amount: '',
+        date: '',
+        description: '',
+        category: '',
+    })
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
     }
@@ -19,9 +26,10 @@ export default function ExpenseCreate() {
         setSubmitting(true); setError('')
         try {
             await clientService.createExpense({
-                amount: Number(formData.amount),
-                date: formData.date,
-                description: formData.description
+                amount:      Number(formData.amount),
+                date:        formData.date,
+                description: formData.description,
+                category:    formData.category,
             })
             navigate('/client/finances')
         } catch {
@@ -75,6 +83,28 @@ export default function ExpenseCreate() {
                                 type="date" name="date" id="expense_date"
                                 value={formData.date} onChange={handleChange} required
                             />
+                        </div>
+
+                        <div className="form-group-expense">
+                            <label htmlFor="expense_category">
+                                <i className="fas fa-tag"></i> Categoría
+                            </label>
+                            <select
+                                name="category"
+                                id="expense_category"
+                                value={formData.category}
+                                onChange={handleChange}
+                            >
+                                <option value="">Sin categoría</option>
+                                <option value="Insumos agrícolas">Insumos agrícolas</option>
+                                <option value="Mano de obra">Mano de obra</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Maquinaria / herramientas">Maquinaria / herramientas</option>
+                                <option value="Alimentación animal">Alimentación animal</option>
+                                <option value="Servicios públicos">Servicios públicos</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                                <option value="Otros gastos">Otros gastos</option>
+                            </select>
                         </div>
 
                         <div className="form-group-expense">

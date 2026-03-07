@@ -5,11 +5,18 @@ import '../create-forms.css'
 
 export default function IncomeCreate() {
     const navigate = useNavigate()
-    const [formData, setFormData] = useState({ amount: '', date: '', description: '' })
+    const [formData, setFormData] = useState({
+        amount: '',
+        date: '',
+        description: '',
+        category: '',
+    })
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
     }
@@ -19,9 +26,10 @@ export default function IncomeCreate() {
         setSubmitting(true); setError('')
         try {
             await clientService.createIncome({
-                amount: Number(formData.amount),
-                date: formData.date,
-                description: formData.description
+                amount:      Number(formData.amount),
+                date:        formData.date,
+                description: formData.description,
+                category:    formData.category,
             })
             navigate('/client/finances')
         } catch {
@@ -75,6 +83,26 @@ export default function IncomeCreate() {
                                 type="date" name="date" id="income_date"
                                 value={formData.date} onChange={handleChange} required
                             />
+                        </div>
+
+                        <div className="form-group-income">
+                            <label htmlFor="income_category">
+                                <i className="fas fa-tag"></i> Categoría
+                            </label>
+                            <select
+                                name="category"
+                                id="income_category"
+                                value={formData.category}
+                                onChange={handleChange}
+                            >
+                                <option value="">Sin categoría</option>
+                                <option value="Venta de cultivos">Venta de cultivos</option>
+                                <option value="Venta de animales">Venta de animales</option>
+                                <option value="Venta de leche / huevos">Venta de leche / huevos</option>
+                                <option value="Subsidios / apoyos">Subsidios / apoyos</option>
+                                <option value="Arriendo de tierra">Arriendo de tierra</option>
+                                <option value="Otros ingresos">Otros ingresos</option>
+                            </select>
                         </div>
 
                         <div className="form-group-income">

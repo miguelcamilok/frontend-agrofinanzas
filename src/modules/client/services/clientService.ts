@@ -46,11 +46,11 @@ export const clientService = {
         return response.data as Blob
     },
 
-    async createIncome(payload: { amount: number; date: string; description?: string }) {
+    async createIncome(payload: { amount: number; date: string; description?: string; category?: string }) {
         const { data } = await axiosClient.post<{ success: boolean; message?: string }>('/client/income', payload)
         return data
     },
-    async createExpense(payload: { amount: number; date: string; description?: string }) {
+    async createExpense(payload: { amount: number; date: string; description?: string; category?: string }) {
         const { data } = await axiosClient.post<{ success: boolean; message?: string }>('/client/expense', payload)
         return data
     },
@@ -82,4 +82,32 @@ export const clientService = {
         const { data } = await axiosClient.patch<{ success: boolean }>(`/client/debt/${id}/pay`)
         return data
     },
+    //analisis
+    async analyzeFinances(payload: {
+    filter?: string
+    date_from?: string
+    date_to?: string
+}) {
+    const { data } = await axiosClient.post<{
+        success: boolean
+        source?: string
+        score: number
+        score_label: string
+        score_color: string
+        resumen: string
+        recomendaciones: {
+            tipo: string
+            icono: string
+            titulo: string
+            detalle: string
+        }[]
+        alertas_criticas: number
+        mayor_fortaleza: string
+        mayor_riesgo: string | null
+        period?: string
+        total_records?: number
+        message?: string
+    }>('/finances/analyze', payload)
+    return data
+},
 }

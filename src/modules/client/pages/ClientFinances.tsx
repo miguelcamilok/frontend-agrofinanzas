@@ -133,6 +133,10 @@ export default function ClientFinances() {
     const [calcOpen,  setCalcOpen]  = useState(false)
     const [calcValue, setCalcValue] = useState('')
 
+    const [analysis,        setAnalysis]        = useState<Awaited<ReturnType<typeof clientService.analyzeFinances>> | null>(null)
+    const [analyzing,       setAnalyzing]       = useState(false)
+    const [analysisOpen,    setAnalysisOpen]    = useState<number[]>([])
+
     const heroBgRef = useRef<HTMLDivElement>(null)
 
     /* ── Parallax ── */
@@ -326,6 +330,24 @@ export default function ClientFinances() {
         else if (v === 'C') { setCalcValue('') }
         else                { setCalcValue(p => p + v) }
     }
+    const handleAnalyze = async () => {
+    setAnalyzing(true)
+    setAnalysis(null)
+    try {
+        const result = await clientService.analyzeFinances({
+            filter,
+            date_from: activeDR?.from ?? '',
+            date_to:   activeDR?.to   ?? '',
+        })
+        setAnalysis(result)
+    } catch {
+        setAlert({ type: 'error', msg: 'Error al generar el análisis IA.' })
+    }
+    setAnalyzing(false)
+}
+
+const toggleRec = (i: number) =>
+    setAnalysisOpen(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])
 
     useEffect(() => {
         if (alert) { const t = setTimeout(() => setAlert(null), 5000); return () => clearTimeout(t) }
@@ -444,7 +466,100 @@ export default function ClientFinances() {
                     </div>
                 </div>
             </div>
+{/* ════ ANÁLISIS IA ════ */}
+<div className="ai-analysis-section">
+    <div className="section-heading" style={{ marginBottom: 0 }}>
+        <span className="section-heading-tag">
+            <i className="fas fa-brain"></i> Análisis Financiero IA
+        </span>
+        <span className="section-heading-line"></span>
+        <button className="btn-analyze" onClick={handleAnalyze} disabled={analyzing}>
+            <i className={`fas ${analyzing ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'}`}></i>
+            {analyzing ? 'Analizando…' : 'Analizar ahora'}
+        </button>
+    </div>
 
+    {analyzing && (
+        <div className="ai-skeleton">
+            <div className="ai-skeleton-ring"></div>
+            <div className="ai-skeleton-lines">
+                <div className="ai-skel-line w80"></div>
+                <div className="ai-skel-line w60"></div>
+                <div className="ai-skel-line w70"></div>
+            </div>
+        </div>
+    )}
+
+    {!analyzing && analysis?.success && (
+        <div className="ai-result">
+            {/* Score */}
+            <div className="ai-score-wrap">
+                <svg viewBox="0 0 140 140" className="ai-score-ring">
+                    <circle cx="70" cy="70" r="54" fill="none" stroke="var(--crema-2)" strokeWidth="10"/>
+                    <circle cx="70" cy="70" r="54" fill="none"
+                        stroke={analysis.score_color}
+                        strokeWidth="10"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(analysis.score / 100) * 339.3} 339.3`}
+                        strokeDashoffset="84.8"
+                        style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(.34,1.1,.64,1)' }}
+                    />
+                    <text x="70" y="66" textAnchor="middle" fontSize="28" fontWeight="700"
+                        fontFamily="JetBrains Mono" fill={analysis.score_color}>{analysis.score}</text>
+                    <text x="70" y="83" textAnchor="middle" fontSize="9.5" fontWeight="700"
+                        fontFamily="Source Sans 3" fill="var(--barro)" letterSpacing="1">{analysis.score_label.toUpperCase()}</text>
+                </svg>
+            </div>
+
+            {/* Resumen */}
+            <div className="ai-summary">
+                <p className="ai-resumen">"{analysis.resumen}"</p>
+                <div className="ai-highlights">
+                    {analysis.mayor_fortaleza && (
+                        <div className="ai-highlight green">
+                            <i className="fas fa-circle-check"></i>
+                            <span>{analysis.mayor_fortaleza}</span>
+                        </div>
+                    )}
+                    {analysis.mayor_riesgo && (
+                        <div className="ai-highlight red">
+                            <i className="fas fa-triangle-exclamation"></i>
+                            <span>{analysis.mayor_riesgo}</span>
+                        </div>
+                    )}
+                </div>
+                <div className="ai-meta">
+                    <span><i className="fas fa-database"></i> {analysis.total_records} registros</span>
+                    {analysis.alertas_criticas > 0 && (
+                        <span className="ai-meta-alert">
+                            <i className="fas fa-bell"></i> {analysis.alertas_criticas} alerta{analysis.alertas_criticas > 1 ? 's' : ''}
+                        </span>
+                    )}
+                    <span className="ai-meta-badge">
+                        <i className="fas fa-microchip"></i> IA
+                    </span>
+                </div>
+            </div>
+
+            {/* Recomendaciones */}
+            <div className="ai-recs">
+                {analysis.recomendaciones.map((r, i) => (
+                    <div key={i} className={`ai-rec ai-rec-${r.tipo}`} onClick={() => toggleRec(i)}>
+                        <div className="ai-rec-header">
+                            <span className="ai-rec-icon"><i className={`fas fa-${r.icono}`}></i></span>
+                            <span className="ai-rec-titulo">{r.titulo}</span>
+                            <span className="ai-rec-tipo">{r.tipo}</span>
+                            <i className={`fas fa-chevron-${analysisOpen.includes(i) ? 'up' : 'down'} ai-rec-chevron`}></i>
+                        </div>
+                        {analysisOpen.includes(i) && (
+                            <p className="ai-rec-detalle">{r.detalle}</p>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    )}
+</div>
             {/* ════ KPI CARDS ════ */}
             <div className="summary-grid">
                 {SUMMARY_CARDS.map((c, i) => (
@@ -570,6 +685,7 @@ export default function ClientFinances() {
                     </div>
                 </div>
             </div>
+
 
             {/* ════ MODAL EDITAR ════ */}
             {editItem && (

@@ -13,19 +13,21 @@ export function Navbar() {
     const navigate = useNavigate()
 
     // ── State ──
-    const [agronomyOpen, setAgronomyOpen] = useState(false)
-    const [financeOpen, setFinanceOpen] = useState(false)
-    const [profileOpen, setProfileOpen] = useState(false)
-    const [drawerOpen, setDrawerOpen] = useState(false)
+    const [agronomyOpen,  setAgronomyOpen]  = useState(false)
+    const [financeOpen,   setFinanceOpen]   = useState(false)
+    const [profileOpen,   setProfileOpen]   = useState(false)
+    const [drawerOpen,    setDrawerOpen]    = useState(false)
     const [notifications, setNotifications] = useState<Notification[]>([])
-    const [unreadCount, setUnreadCount] = useState(0)
+    const [unreadCount,   setUnreadCount]   = useState(0)
+    const [deletingId,    setDeletingId]    = useState<number | null>(null)
+    const [deletingAll,   setDeletingAll]   = useState(false)
 
     // ── Refs ──
     const profileMenuRef = useRef<HTMLDivElement>(null)
-    const profileBtnRef = useRef<HTMLDivElement>(null)
+    const profileBtnRef  = useRef<HTMLDivElement>(null)
 
     const userPhoto = user?.profile_photo || '/img/profile.png'
-    const userName = user?.name || ''
+    const userName  = user?.name || ''
 
     // ── Close all menus ──
     const closeAllMenus = useCallback(() => {
@@ -79,6 +81,7 @@ export function Navbar() {
             .catch(() => { /* silently fail */ })
     }, [])
 
+    // ── Marcar una como leída ──
     const markRead = useCallback((id: number) => {
         axiosClient.post(`/notificaciones/${id}/leer`)
             .then(() => {
@@ -90,6 +93,7 @@ export function Navbar() {
             .catch(err => console.error('markRead:', err))
     }, [checkUnreadCount])
 
+    // ── Marcar todas como leídas ──
     const markAllRead = useCallback(() => {
         axiosClient.post('/notificaciones/leer-todas')
             .then(() => {
@@ -97,6 +101,31 @@ export function Navbar() {
                 setUnreadCount(0)
             })
             .catch(err => console.error('markAllRead:', err))
+    }, [])
+
+    // ── Eliminar UNA notificación ──
+    const deleteNotification = useCallback((e: React.MouseEvent, id: number) => {
+        e.stopPropagation() // evita marcar como leída al eliminar
+        setDeletingId(id)
+        axiosClient.delete(`/notificaciones/${id}`)
+            .then(r => {
+                setNotifications(prev => prev.filter(n => n.id !== id))
+                setUnreadCount(r.data.unread_count ?? 0)
+            })
+            .catch(err => console.error('deleteNotification:', err))
+            .finally(() => setDeletingId(null))
+    }, [])
+
+    // ── Eliminar TODAS las notificaciones ──
+    const deleteAll = useCallback(() => {
+        setDeletingAll(true)
+        axiosClient.delete('/notificaciones/todas')
+            .then(() => {
+                setNotifications([])
+                setUnreadCount(0)
+            })
+            .catch(err => console.error('deleteAll:', err))
+            .finally(() => setDeletingAll(false))
     }, [])
 
     // ── Logout ──
@@ -121,7 +150,6 @@ export function Navbar() {
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             const target = e.target as HTMLElement
-            // Close dropdown menus
             const navLinks = document.querySelectorAll('.af-dropdown > .af-nav-link')
             let insideNav = false
             navLinks.forEach(l => { if (l.contains(target)) insideNav = true })
@@ -129,15 +157,13 @@ export function Navbar() {
                 setAgronomyOpen(false)
                 setFinanceOpen(false)
             }
-            // Close profile menu
             if (profileMenuRef.current && profileBtnRef.current) {
                 if (!profileMenuRef.current.contains(target) && !profileBtnRef.current.contains(target)) {
                     setProfileOpen(false)
                 }
             }
-            // Close drawer on outside click
             const drawer = document.getElementById('afMobileDrawer')
-            const ham = document.getElementById('afHamburger')
+            const ham    = document.getElementById('afHamburger')
             if (drawer?.classList.contains('open') && !drawer.contains(target) && !ham?.contains(target)) {
                 setDrawerOpen(false)
                 document.body.style.overflow = ''
@@ -166,11 +192,9 @@ export function Navbar() {
         closeAllMenus()
     }, [pathname, closeAllMenus])
 
-    const logoRoute = isAuthenticated ? '/inicio' : '/'
-
-    // ── Active class helpers ──
+    const logoRoute    = isAuthenticated ? '/inicio' : '/'
     const agronomyActive = isActive('agronomy') || isActive('hens') || isActive('cattles') || isActive('avocado') || isActive('coffe')
-    const financeActive = isActive('finance') || isActive('income') || isActive('expense') || isActive('investment') || isActive('debt') || isActive('inventory') || isActive('costs') || isActive('client/hato')
+    const financeActive  = isActive('finance') || isActive('income') || isActive('expense') || isActive('investment') || isActive('debt') || isActive('inventory') || isActive('costs') || isActive('client/hato')
 
     return (
         <>
@@ -203,43 +227,37 @@ export function Navbar() {
                         <>
                             {/* Agronomía dropdown */}
                             <li className="af-dropdown">
-                                <a
-                                    href="#"
-                                    className={`af-nav-link ${agronomyActive ? 'active' : ''}`}
-                                    onClick={(e) => { e.preventDefault(); toggleAgronomyMenu() }}
-                                >
+                                <a href="#" className={`af-nav-link ${agronomyActive ? 'active' : ''}`}
+                                    onClick={(e) => { e.preventDefault(); toggleAgronomyMenu() }}>
                                     Agronomía <i className="fas fa-chevron-down" style={{ fontSize: '0.62rem', marginLeft: '3px' }}></i>
                                 </a>
                                 <div className={`af-agronomy-submenu ${agronomyOpen ? 'show' : ''}`}>
                                     <div className="af-submenu-header"><i className="fas fa-leaf"></i> Producción Agropecuaria</div>
                                     <div className="af-submenu-section">
-                                        <Link to="/hens" className="af-submenu-item"><i className="fas fa-egg" style={{ color: '#f59e0b' }}></i> Aves de Corral</Link>
-                                        <Link to="/cattles" className="af-submenu-item"><i className="fas fa-horse" style={{ color: '#a16207' }}></i> Ganado Vacuno</Link>
-                                        <Link to="/avocadocrops" className="af-submenu-item"><i className="fas fa-apple-whole" style={{ color: '#16a34a' }}></i> Cultivo de Aguacate</Link>
-                                        <Link to="/coffe_crops" className="af-submenu-item"><i className="fas fa-mug-hot" style={{ color: '#92400e' }}></i> Cultivo de Café</Link>
+                                        <Link to="/hens"          className="af-submenu-item"><i className="fas fa-egg"        style={{ color: '#f59e0b' }}></i> Aves de Corral</Link>
+                                        <Link to="/cattles"       className="af-submenu-item"><i className="fas fa-horse"      style={{ color: '#a16207' }}></i> Ganado Vacuno</Link>
+                                        <Link to="/avocadocrops"  className="af-submenu-item"><i className="fas fa-apple-whole" style={{ color: '#16a34a' }}></i> Cultivo de Aguacate</Link>
+                                        <Link to="/coffe_crops"   className="af-submenu-item"><i className="fas fa-mug-hot"   style={{ color: '#92400e' }}></i> Cultivo de Café</Link>
                                     </div>
                                 </div>
                             </li>
 
                             {/* Finanzas dropdown */}
                             <li className="af-dropdown">
-                                <a
-                                    href="#"
-                                    className={`af-nav-link ${financeActive ? 'active' : ''}`}
-                                    onClick={(e) => { e.preventDefault(); toggleFinanceMenu() }}
-                                >
+                                <a href="#" className={`af-nav-link ${financeActive ? 'active' : ''}`}
+                                    onClick={(e) => { e.preventDefault(); toggleFinanceMenu() }}>
                                     Finanzas <i className="fas fa-chevron-down" style={{ fontSize: '0.62rem', marginLeft: '3px' }}></i>
                                 </a>
                                 <div className={`af-finance-submenu ${financeOpen ? 'show' : ''}`}>
                                     <div className="af-submenu-header"><i className="fas fa-chart-line"></i> Gestión Financiera</div>
                                     <div className="af-submenu-section">
                                         <div className="af-submenu-label">Registrar</div>
-                                        <Link to="/client/income/create" className="af-submenu-item"><i className="fas fa-plus-circle" style={{ color: '#8ac926' }}></i> Ingreso</Link>
-                                        <Link to="/client/expense/create" className="af-submenu-item"><i className="fas fa-minus-circle" style={{ color: '#ff6b6b' }}></i> Gasto</Link>
-                                        <Link to="/client/investment/create" className="af-submenu-item"><i className="fas fa-building" style={{ color: '#3b82f6' }}></i> Inversión</Link>
-                                        <Link to="/client/debt/create" className="af-submenu-item"><i className="fas fa-credit-card" style={{ color: '#f59e0b' }}></i> Deuda</Link>
-                                        <Link to="/client/inventory/create" className="af-submenu-item"><i className="fas fa-boxes" style={{ color: '#a855f7' }}></i> Inventario</Link>
-                                        <Link to="/client/costs/create" className="af-submenu-item"><i className="fas fa-seedling" style={{ color: '#14b8a6' }}></i> Costos</Link>
+                                        <Link to="/client/income/create"     className="af-submenu-item"><i className="fas fa-plus-circle"  style={{ color: '#8ac926' }}></i> Ingreso</Link>
+                                        <Link to="/client/expense/create"    className="af-submenu-item"><i className="fas fa-minus-circle" style={{ color: '#ff6b6b' }}></i> Gasto</Link>
+                                        <Link to="/client/investment/create" className="af-submenu-item"><i className="fas fa-building"     style={{ color: '#3b82f6' }}></i> Inversión</Link>
+                                        <Link to="/client/debt/create"       className="af-submenu-item"><i className="fas fa-credit-card"  style={{ color: '#f59e0b' }}></i> Deuda</Link>
+                                        <Link to="/client/inventory/create"  className="af-submenu-item"><i className="fas fa-boxes"        style={{ color: '#a855f7' }}></i> Inventario</Link>
+                                        <Link to="/client/costs/create"      className="af-submenu-item"><i className="fas fa-seedling"     style={{ color: '#14b8a6' }}></i> Costos</Link>
                                     </div>
                                     <div className="af-submenu-divider"></div>
                                     <div className="af-submenu-section">
@@ -255,10 +273,8 @@ export function Navbar() {
 
                             {/* Comunidad */}
                             <li>
-                                <Link
-                                    to="/recommendations"
-                                    className={`af-nav-link ${isActive('recommendations') ? 'active' : ''}`}
-                                >
+                                <Link to="/recommendations"
+                                    className={`af-nav-link ${isActive('recommendations') ? 'active' : ''}`}>
                                     Comunidad
                                 </Link>
                             </li>
@@ -266,20 +282,14 @@ export function Navbar() {
                             {/* Profile */}
                             <li className="af-profile-menu">
                                 <div className="af-profile-trigger">
-                                    <div
-                                        className="af-avatar-wrapper"
-                                        ref={profileBtnRef}
-                                        onClick={(e) => { e.stopPropagation(); toggleProfileMenu() }}
-                                    >
+                                    <div className="af-avatar-wrapper" ref={profileBtnRef}
+                                        onClick={(e) => { e.stopPropagation(); toggleProfileMenu() }}>
                                         <img
                                             src={userPhoto}
                                             className={`af-profile-avatar ${unreadCount > 0 ? 'af-avatar--has-notif' : ''}`}
                                             onError={(e) => {
                                                 const img = e.currentTarget
-                                                if (!img.dataset.fallback) {
-                                                    img.dataset.fallback = '1'
-                                                    img.src = '/img/foto_perfil.jpg'
-                                                }
+                                                if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = '/img/foto_perfil.jpg' }
                                             }}
                                             alt="Profile"
                                         />
@@ -291,16 +301,12 @@ export function Navbar() {
                                     </div>
 
                                     <div className={`af-dropdown-content ${profileOpen ? 'show' : ''}`} ref={profileMenuRef}>
+                                        {/* Usuario */}
                                         <div className="af-dropdown-user">
-                                            <img
-                                                src={userPhoto}
-                                                className="af-dropdown-avatar"
+                                            <img src={userPhoto} className="af-dropdown-avatar"
                                                 onError={(e) => {
                                                     const img = e.currentTarget
-                                                    if (!img.dataset.fallback) {
-                                                        img.dataset.fallback = '1'
-                                                        img.src = '/img/foto_perfil.jpg'
-                                                    }
+                                                    if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = '/img/foto_perfil.jpg' }
                                                 }}
                                                 alt="Avatar"
                                             />
@@ -312,11 +318,32 @@ export function Navbar() {
 
                                         <hr className="af-menu-divider" />
 
+                                        {/* Notificaciones */}
                                         <div className="af-notif-section">
                                             <div className="af-notif-header">
                                                 <span><i className="fas fa-bell"></i> Notificaciones</span>
-                                                <button className="af-notif-mark-all" onClick={markAllRead}>Marcar todas</button>
+                                                <div className="af-notif-actions">
+                                                    {notifications.some(n => !n.is_read) && (
+                                                        <button className="af-notif-mark-all" onClick={markAllRead} title="Marcar todas como leídas">
+                                                            <i className="fas fa-check-double"></i> Leídas
+                                                        </button>
+                                                    )}
+                                                    {notifications.length > 0 && (
+                                                        <button
+                                                            className="af-notif-delete-all"
+                                                            onClick={deleteAll}
+                                                            disabled={deletingAll}
+                                                            title="Eliminar todas"
+                                                        >
+                                                            {deletingAll
+                                                                ? <i className="fas fa-spinner fa-spin"></i>
+                                                                : <><i className="fas fa-trash"></i> Limpiar</>
+                                                            }
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
+
                                             <div className="af-notif-list">
                                                 {notifications.length === 0 ? (
                                                     <div className="af-notif-empty">
@@ -328,7 +355,7 @@ export function Navbar() {
                                                         <div
                                                             key={n.id}
                                                             className={`af-notif-item ${!n.is_read ? 'af-notif-item--unread' : ''}`}
-                                                            onClick={() => markRead(n.id)}
+                                                            onClick={() => !n.is_read && markRead(n.id)}
                                                         >
                                                             <img
                                                                 src={n.from_user?.profile_photo || '/img/profile.png'}
@@ -342,7 +369,20 @@ export function Navbar() {
                                                                     <i className="fas fa-clock"></i> {timeAgoEs(n.created_at)}
                                                                 </span>
                                                             </div>
-                                                            {!n.is_read && <span className="af-notif-dot"></span>}
+                                                            <div className="af-notif-item-actions">
+                                                                {!n.is_read && <span className="af-notif-dot"></span>}
+                                                                <button
+                                                                    className="af-notif-delete-btn"
+                                                                    onClick={(e) => deleteNotification(e, n.id)}
+                                                                    disabled={deletingId === n.id}
+                                                                    title="Eliminar notificación"
+                                                                >
+                                                                    {deletingId === n.id
+                                                                        ? <i className="fas fa-spinner fa-spin"></i>
+                                                                        : <i className="fas fa-xmark"></i>
+                                                                    }
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     ))
                                                 )}
@@ -381,15 +421,10 @@ export function Navbar() {
                 {isAuthenticated ? (
                     <>
                         <div className="af-drawer-user">
-                            <img
-                                src={userPhoto}
-                                className="af-drawer-avatar"
+                            <img src={userPhoto} className="af-drawer-avatar"
                                 onError={(e) => {
                                     const img = e.currentTarget
-                                    if (!img.dataset.fallback) {
-                                        img.dataset.fallback = '1'
-                                        img.src = '/img/foto_perfil.jpg'
-                                    }
+                                    if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = '/img/foto_perfil.jpg' }
                                 }}
                                 alt="User"
                             />
@@ -399,37 +434,36 @@ export function Navbar() {
                             </div>
                         </div>
 
-                        {/* Agronomía */}
                         <div className="af-drawer-section">
                             <div className="af-drawer-label">Agronomía</div>
-                            <Link to="/hens" className="af-drawer-link"><i className="fas fa-egg" style={{ color: '#f59e0b' }}></i> Aves de Corral</Link>
-                            <Link to="/cattles" className="af-drawer-link"><i className="fas fa-horse" style={{ color: '#a16207' }}></i> Ganado Vacuno</Link>
+                            <Link to="/hens"         className="af-drawer-link"><i className="fas fa-egg"         style={{ color: '#f59e0b' }}></i> Aves de Corral</Link>
+                            <Link to="/cattles"      className="af-drawer-link"><i className="fas fa-horse"       style={{ color: '#a16207' }}></i> Ganado Vacuno</Link>
                             <Link to="/avocadocrops" className="af-drawer-link"><i className="fas fa-apple-whole" style={{ color: '#16a34a' }}></i> Cultivo de Aguacate</Link>
-                            <Link to="/coffe_crops" className="af-drawer-link"><i className="fas fa-mug-hot" style={{ color: '#92400e' }}></i> Cultivo de Café</Link>
+                            <Link to="/coffe_crops"  className="af-drawer-link"><i className="fas fa-mug-hot"     style={{ color: '#92400e' }}></i> Cultivo de Café</Link>
                         </div>
 
                         <div className="af-drawer-divider"></div>
 
-                        {/* Finanzas */}
                         <div className="af-drawer-section">
                             <div className="af-drawer-label">Finanzas</div>
-                            <Link to="/client/income/create" className="af-drawer-link"><i className="fas fa-plus-circle" style={{ color: '#8ac926' }}></i> Registrar Ingreso</Link>
-                            <Link to="/client/expense/create" className="af-drawer-link"><i className="fas fa-minus-circle" style={{ color: '#ff6b6b' }}></i> Registrar Gasto</Link>
-                            <Link to="/client/investment/create" className="af-drawer-link"><i className="fas fa-building" style={{ color: '#3b82f6' }}></i> Inversión</Link>
-                            <Link to="/client/debt/create" className="af-drawer-link"><i className="fas fa-credit-card" style={{ color: '#f59e0b' }}></i> Deuda</Link>
-                            <Link to="/client/inventory/create" className="af-drawer-link"><i className="fas fa-boxes" style={{ color: '#a855f7' }}></i> Inventario</Link>
-                            <Link to="/client/costs/create" className="af-drawer-link"><i className="fas fa-seedling" style={{ color: '#14b8a6' }}></i> Costos</Link>
-                            <Link to="/client/hato/hato" className="af-drawer-link"><i className="fas fa-cow" style={{ color: '#f59e0b' }}></i> Mi Hato Ganadero</Link>
-                            <Link to="/client/finances" className="af-drawer-link" style={{ color: '#8ac926', fontWeight: 600 }}><i className="fas fa-history" style={{ color: '#8ac926' }}></i> Historial Completo</Link>
+                            <Link to="/client/income/create"     className="af-drawer-link"><i className="fas fa-plus-circle"  style={{ color: '#8ac926' }}></i> Registrar Ingreso</Link>
+                            <Link to="/client/expense/create"    className="af-drawer-link"><i className="fas fa-minus-circle" style={{ color: '#ff6b6b' }}></i> Registrar Gasto</Link>
+                            <Link to="/client/investment/create" className="af-drawer-link"><i className="fas fa-building"     style={{ color: '#3b82f6' }}></i> Inversión</Link>
+                            <Link to="/client/debt/create"       className="af-drawer-link"><i className="fas fa-credit-card"  style={{ color: '#f59e0b' }}></i> Deuda</Link>
+                            <Link to="/client/inventory/create"  className="af-drawer-link"><i className="fas fa-boxes"        style={{ color: '#a855f7' }}></i> Inventario</Link>
+                            <Link to="/client/costs/create"      className="af-drawer-link"><i className="fas fa-seedling"     style={{ color: '#14b8a6' }}></i> Costos</Link>
+                            <Link to="/client/hato/hato"         className="af-drawer-link"><i className="fas fa-cow"          style={{ color: '#f59e0b' }}></i> Mi Hato Ganadero</Link>
+                            <Link to="/client/finances"          className="af-drawer-link" style={{ color: '#8ac926', fontWeight: 600 }}>
+                                <i className="fas fa-history" style={{ color: '#8ac926' }}></i> Historial Completo
+                            </Link>
                         </div>
 
                         <div className="af-drawer-divider"></div>
 
-                        {/* Cuenta */}
                         <div className="af-drawer-section">
                             <div className="af-drawer-label">Cuenta</div>
-                            <Link to="/recommendations" className="af-drawer-link"><i className="fas fa-users" style={{ color: '#8ac926' }}></i> Comunidad</Link>
-                            <Link to="/editar-perfil" className="af-drawer-link"><i className="fas fa-user-pen" style={{ color: '#8ac926' }}></i> Editar Perfil</Link>
+                            <Link to="/recommendations" className="af-drawer-link"><i className="fas fa-users"    style={{ color: '#8ac926' }}></i> Comunidad</Link>
+                            <Link to="/editar-perfil"   className="af-drawer-link"><i className="fas fa-user-pen" style={{ color: '#8ac926' }}></i> Editar Perfil</Link>
                         </div>
 
                         <div className="af-drawer-divider"></div>
