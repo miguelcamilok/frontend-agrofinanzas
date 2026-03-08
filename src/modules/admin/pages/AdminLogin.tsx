@@ -1,4 +1,4 @@
-    import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '@shared/context/AuthContext'
 import { adminService } from '../services/adminService'
@@ -18,7 +18,11 @@ export default function AdminLogin() {
         try {
             const data = await adminService.login(email, password)
             if (data.success && data.token) {
-                adminLogin(data.token, { id: data.admin?.id || 0, name: data.admin?.name || 'Admin', email: data.admin?.email || email })
+                adminLogin(data.token, {
+                    id: data.admin?.id || 0,
+                    name: data.admin?.name || 'Admin',
+                    email: data.admin?.email || email,
+                })
                 navigate('/admin/dashboard')
             } else {
                 setError(data.message || 'Credenciales inválidas')
@@ -32,10 +36,53 @@ export default function AdminLogin() {
     return (
         <div className="admin-login-page">
             <div className="login-wrap">
-                <div className="login-logo">
-                    <h1>Agro<span>Finanzas</span></h1>
-                    <p>Panel de Administración</p>
+
+                {/* ── Panel izquierdo decorativo ── */}
+                <div className="login-panel-left">
+                    <div>
+                        <div className="login-panel-left__logo">
+                            <h1>Agro<span>Finanzas</span></h1>
+                            <p>Panel de Administración</p>
+                        </div>
+
+                        <div className="login-panel-left__pills">
+                            <div className="login-pill">
+                                <div className="login-pill__icon">
+                                    <i className="fas fa-users"></i>
+                                </div>
+                                <div className="login-pill__text">
+                                    <strong>Gestión de Usuarios</strong>
+                                    <span>Activar, bloquear y eliminar cuentas</span>
+                                </div>
+                            </div>
+                            <div className="login-pill">
+                                <div className="login-pill__icon">
+                                    <i className="fas fa-chart-line"></i>
+                                </div>
+                                <div className="login-pill__text">
+                                    <strong>Finanzas del Campo</strong>
+                                    <span>Vista global de todos los registros</span>
+                                </div>
+                            </div>
+                            <div className="login-pill">
+                                <div className="login-pill__icon">
+                                    <i className="fas fa-comments"></i>
+                                </div>
+                                <div className="login-pill__text">
+                                    <strong>Comunidad</strong>
+                                    <span>Moderación de comentarios y contenido</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="login-panel-left__footer">
+                        <i className="fas fa-shield-halved"></i>
+                        Acceso restringido · Solo personal autorizado
+                    </div>
                 </div>
+
+                {/* ── Panel derecho — formulario ── */}
                 <div className="login-card">
                     <div className="login-header">
                         <i className="fas fa-shield-halved"></i>
@@ -43,24 +90,43 @@ export default function AdminLogin() {
                         <p>Solo personal autorizado</p>
                     </div>
                     <div className="login-body">
-                        {error && <div className="error-box"><i className="fas fa-exclamation-circle"></i> {error}</div>}
+                        {error && (
+                            <div className="error-box">
+                                <i className="fas fa-exclamation-circle"></i> {error}
+                            </div>
+                        )}
                         <form onSubmit={handleSubmit}>
                             <div className="fg">
                                 <label>Correo electrónico</label>
                                 <div className="fg-input">
                                     <i className="fas fa-envelope"></i>
-                                    <input type="email" placeholder="admin@agrofinanzas.com" value={email} onChange={e => setEmail(e.target.value)} required autoFocus />
+                                    <input
+                                        type="email"
+                                        placeholder="admin@agrofinanzas.com"
+                                        value={email}
+                                        onChange={e => setEmail(e.target.value)}
+                                        required autoFocus
+                                    />
                                 </div>
                             </div>
                             <div className="fg">
                                 <label>Contraseña</label>
                                 <div className="fg-input">
                                     <i className="fas fa-lock"></i>
-                                    <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+                                    <input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={e => setPassword(e.target.value)}
+                                        required
+                                    />
                                 </div>
                             </div>
                             <button type="submit" className="login-btn" disabled={submitting}>
-                                {submitting ? <><i className="fas fa-spinner fa-spin"></i> Ingresando...</> : <><i className="fas fa-right-to-bracket"></i> Ingresar al Panel</>}
+                                {submitting
+                                    ? <><i className="fas fa-spinner fa-spin"></i> Ingresando...</>
+                                    : <><i className="fas fa-right-to-bracket"></i> Ingresar al Panel</>
+                                }
                             </button>
                         </form>
                         <div className="security-note">
@@ -69,6 +135,7 @@ export default function AdminLogin() {
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     )
