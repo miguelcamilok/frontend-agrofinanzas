@@ -443,3 +443,62 @@ tr:hover td { background: rgba(245,237,214,.5); }
   margin-bottom: 14px;
   flex-shrink: 0;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — admin-pages.css
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Summary row — 2 col */
+  .summary-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .sum-card { padding: 12px 14px; }
+  .sum-card__val { font-size: 1.1rem; }
+
+  /* User hero — apilado */
+  .user-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+  }
+  .user-hero__actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .btn-action { flex: 1; justify-content: center; }
+
+  /* Tabs full width */
+  .tabs { flex-direction: row; }
+  .tab-btn { flex: 1; justify-content: center; font-size: .7rem; padding: 8px 10px; }
+
+  /* Comment cards */
+  .comment-card {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+  .btn-del-comment { width: 100%; justify-content: center; }
+
+  /* Table scroll */
+  .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table-wrap table { min-width: 520px; }
+
+  /* Stats */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .stat-card { padding: 14px; }
+  .stat-card__num { font-size: 1.5rem; }
+}
+
+@media (max-width: 420px) {
+  .summary-row { grid-template-columns: 1fr 1fr; }
+  .stats-grid  { grid-template-columns: 1fr; }
+  .user-hero__name { font-size: 1.1rem; }
+  .tabs { gap: 2px; }
+  .tab-btn { font-size: .65rem; padding: 7px 6px; }
+}

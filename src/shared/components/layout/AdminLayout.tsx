@@ -1,22 +1,19 @@
+import { useState, useCallback } from 'react'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '@shared/context/AuthContext'
 import { useActiveRoute } from '@shared/hooks/useActiveRoute'
 import { axiosClient } from '@shared/services/api/axiosClient'
-import { useCallback } from 'react'
 import './AdminLayout.css'
 
-/**
- * Admin Layout — Replicates admin/layout.blade.php
- * Sidebar + topbar, no main navbar/footer.
- */
 export function AdminLayout() {
     const { admin, adminLogout } = useAdminAuth()
     const { isActive } = useActiveRoute()
     const navigate = useNavigate()
+    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     const handleLogout = useCallback(() => {
         axiosClient.post('/admin/logout')
-            .catch(() => { /* silently fail */ })
+            .catch(() => {})
             .finally(() => {
                 adminLogout()
                 navigate('/admin/login')
@@ -24,11 +21,18 @@ export function AdminLayout() {
     }, [adminLogout, navigate])
 
     const adminInitial = admin?.name ? admin.name.charAt(0).toUpperCase() : 'A'
+    const closeSidebar = () => setSidebarOpen(false)
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* SIDEBAR */}
-            <aside className="admin-sidebar">
+        <div className="admin-shell">
+
+            {/* ── Overlay móvil ── */}
+            {sidebarOpen && (
+                <div className="sidebar-overlay" onClick={closeSidebar} />
+            )}
+
+            {/* ── SIDEBAR ── */}
+            <aside className={`admin-sidebar ${sidebarOpen ? 'sidebar--open' : ''}`}>
                 <div className="sidebar-logo">
                     <h1>Agro<span>Finanzas</span></h1>
                     <p>Panel Admin</p>
@@ -39,6 +43,7 @@ export function AdminLayout() {
                     <Link
                         to="/admin/dashboard"
                         className={`nav-item ${isActive('/admin/dashboard') ? 'active' : ''}`}
+                        onClick={closeSidebar}
                     >
                         <i className="fas fa-chart-pie"></i> Dashboard
                     </Link>
@@ -47,18 +52,21 @@ export function AdminLayout() {
                     <Link
                         to="/admin/usuarios"
                         className={`nav-item ${isActive('/admin/usuarios') ? 'active' : ''}`}
+                        onClick={closeSidebar}
                     >
                         <i className="fas fa-users"></i> Usuarios
                     </Link>
                     <Link
                         to="/admin/finanzas"
                         className={`nav-item ${isActive('/admin/finanzas') ? 'active' : ''}`}
+                        onClick={closeSidebar}
                     >
                         <i className="fas fa-chart-line"></i> Finanzas
                     </Link>
                     <Link
                         to="/admin/comentarios"
                         className={`nav-item ${isActive('/admin/comentarios') ? 'active' : ''}`}
+                        onClick={closeSidebar}
                     >
                         <i className="fas fa-comments"></i> Comentarios
                     </Link>
@@ -78,11 +86,23 @@ export function AdminLayout() {
                 </div>
             </aside>
 
-            {/* MAIN */}
+            {/* ── MAIN ── */}
             <main className="admin-main">
                 <div className="admin-topbar">
+                    {/* Hamburger — solo móvil */}
+                    <button
+                        className="topbar-hamburger"
+                        onClick={() => setSidebarOpen(prev => !prev)}
+                        aria-label="Abrir menú"
+                    >
+                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
+                    </button>
+
                     <div className="topbar-title">Panel de <span>Administración</span></div>
-                    <span className="topbar-badge"><i className="fas fa-shield-halved"></i> Modo Admin</span>
+                    <span className="topbar-badge">
+                        <i className="fas fa-shield-halved"></i>
+                        <span className="badge-text">Modo Admin</span>
+                    </span>
                 </div>
 
                 <div className="admin-content">
