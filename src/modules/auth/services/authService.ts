@@ -6,6 +6,10 @@ export interface LoginResponse {
     token: string
     user: User
     message?: string
+    is_inactive?: boolean   // ← cuenta bloqueada por admin
+    not_verified?: boolean  // ← cuenta sin verificar
+    user_id?: number
+    email?: string
 }
 
 export interface RegisterResponse {

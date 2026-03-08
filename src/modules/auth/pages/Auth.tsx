@@ -113,16 +113,63 @@ export default function Auth() {
     }
 
     const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault(); setLoginError(''); setLoginSubmitting(true)
-        try {
-            const data = await authService.login(loginEmail, loginPassword, loginRemember)
-            if (data.success && data.token && data.user) { authLogin(data.token, data.user); navigate('/inicio') }
-            else setLoginError(data.message || 'Credenciales inválidas')
-        } catch (err: unknown) {
-            const error = err as { response?: { data?: { message?: string } } }
-            setLoginError(error.response?.data?.message || 'Error de conexión')
-        } finally { setLoginSubmitting(false) }
+    e.preventDefault()
+    setLoginError('')
+    setLoginSubmitting(true)
+    try {
+        const data = await authService.login(loginEmail, loginPassword, loginRemember)
+
+        if (data.success && data.token && data.user) {
+            authLogin(data.token, data.user)
+            navigate('/inicio')
+            return
+        }
+
+        // Cuenta suspendida por admin
+        if ((data as { is_inactive?: boolean }).is_inactive) {
+            setLoginError('Tu cuenta ha sido suspendida. Contacta al administrador.')
+            return
+        }
+
+        // Cuenta no verificada — abre modal de verificación
+        if ((data as { not_verified?: boolean; user_id?: number; email?: string }).not_verified) {
+            const d = data as { user_id: number; email: string }
+            openVerifyModal(d.user_id, d.email)
+            return
+        }
+
+        setLoginError(data.message || 'Credenciales inválidas')
+
+    } catch (err: unknown) {
+        const error = err as {
+            response?: {
+                data?: {
+                    message?: string
+                    is_inactive?: boolean
+                    not_verified?: boolean
+                    user_id?: number
+                    email?: string
+                }
+            }
+        }
+
+        const res = error.response?.data
+
+        if (res?.is_inactive) {
+            setLoginError('Tu cuenta ha sido suspendida. Contacta al administrador.')
+            return
+        }
+
+        if (res?.not_verified && res.user_id) {
+            openVerifyModal(res.user_id, res.email ?? loginEmail)
+            return
+        }
+
+        setLoginError(res?.message || 'Error de conexión')
+    } finally {
+        setLoginSubmitting(false)
     }
+}
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
