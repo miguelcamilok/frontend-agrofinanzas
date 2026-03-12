@@ -22,10 +22,10 @@ function UserAvatar({
     fallbackSrc?: string
 }) {
     const [imgError, setImgError] = useState(false)
-    const photo  = getUserPhoto(user)
-    const name   = user?.name || 'A'
+    const photo    = getUserPhoto(user)
+    const name     = user?.name || 'A'
     const initials = name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
-    const cls    = `comm-avatar${size === 'sm' ? ' comm-avatar--sm' : ''}`
+    const cls      = `comm-avatar${size === 'sm' ? ' comm-avatar--sm' : ''}`
 
     useEffect(() => { setImgError(false) }, [photo, fallbackSrc])
 
@@ -47,8 +47,7 @@ function UserAvatar({
 }
 
 /* ════════════════════════════════════════════════════════════
-   Hook: selección local de imagen (SIN subida anticipada).
-   El archivo se guarda en estado y se envía junto al post.
+   Hook: selección local de imagen
 ════════════════════════════════════════════════════════════ */
 function useMediaPicker() {
     const [file, setFile]       = useState<File | null>(null)
@@ -106,6 +105,16 @@ function dotClass(cat: string) {
     return 'cat-dot--opinion'
 }
 
+// ── Extrae el mensaje de error de la respuesta axios ────────
+function extractErrorMessage(err: any): string {
+    // 422 → mensaje del backend (lenguaje inapropiado, validación, etc.)
+    const msg = err?.response?.data?.message
+    if (msg) return msg
+    // Sin conexión / timeout
+    if (err?.code === 'ERR_NETWORK') return 'Sin conexión. Verifica tu internet.'
+    return 'Ocurrió un error. Intenta de nuevo.'
+}
+
 const PULSO = [
     { label: 'Fumigación maíz',   posts: 47, pct: 92 },
     { label: 'Vacunación aftosa', posts: 38, pct: 75 },
@@ -127,14 +136,17 @@ export default function RecommendationsIndex() {
     const [replyingTo, setReplyingTo]         = useState<number | null>(null)
     const [replyContent, setReplyContent]     = useState('')
 
-    // Pickers de imagen (uno para post, uno para respuesta)
+    // ── Errores de publicación ───────────────────────────────
+    const [postError, setPostError]   = useState<string | null>(null)   // error al publicar
+    const [replyError, setReplyError] = useState<string | null>(null)   // error al responder
+
     const mainPicker  = useMediaPicker()
     const replyPicker = useMediaPicker()
 
     /* ── Carga comentarios ── */
     const loadComments = useCallback(async () => {
         try {
-            const cat = activeCategory === 'Todos' ? undefined : activeCategory
+            const cat  = activeCategory === 'Todos' ? undefined : activeCategory
             const data = await recommendationsService.getComments(cat)
             setComments(data.comments || [])
         } catch { /* */ }
@@ -147,34 +159,58 @@ export default function RecommendationsIndex() {
     const handlePost = async () => {
         if (!newContent.trim() && !mainPicker.file) return
         setSubmitting(true)
+        setPostError(null)                          // ← limpiar error anterior
         try {
             await recommendationsService.createComment({
                 content:   newContent,
                 category:  newCategory,
                 mediaFile: mainPicker.file,
             })
-            setNewContent(''); mainPicker.clear()
+            setNewContent('')
+            mainPicker.clear()
             await loadComments()
-        } catch { /* */ }
-        finally { setSubmitting(false) }
+        } catch (err: any) {
+            // ← capturar y mostrar el mensaje del backend
+            setPostError(extractErrorMessage(err))
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     /* ── Responder ── */
     const handleReply = async (commentId: number) => {
         if (!replyContent.trim() && !replyPicker.file) return
+        setReplyError(null)                         // ← limpiar error anterior
         try {
             await recommendationsService.replyToComment(commentId, replyContent, replyPicker.file)
-            setReplyContent(''); setReplyingTo(null); replyPicker.clear()
+            setReplyContent('')
+            setReplyingTo(null)
+            replyPicker.clear()
             await loadComments()
+        } catch (err: any) {
+            // ← capturar y mostrar el mensaje del backend
+            setReplyError(extractErrorMessage(err))
+        }
+    }
+
+    /* ── Like optimista ── */
+    const handleLike = async (id: number) => {
+        try {
+            const res = await recommendationsService.likeComment(id)
+            setComments(prev => prev.map(c =>
+                c.id === id
+                    ? { ...c, liked_by_user: res.liked, likes_count: res.likes_count }
+                    : c
+            ))
         } catch { /* */ }
     }
 
-    const handleLike = async (id: number) => {
-        try { await recommendationsService.likeComment(id); await loadComments() }
-        catch { /* */ }
+    const cancelReply = () => {
+        setReplyingTo(null)
+        setReplyContent('')
+        setReplyError(null)
+        replyPicker.clear()
     }
-
-    const cancelReply = () => { setReplyingTo(null); setReplyContent(''); replyPicker.clear() }
 
     /* ════ RENDER ════ */
     return (
@@ -229,8 +265,26 @@ export default function RecommendationsIndex() {
                                     className="comm-textarea"
                                     placeholder="Comparte una recomendación, duda o comentario con otros productores..."
                                     value={newContent}
-                                    onChange={e => setNewContent(e.target.value)}
+                                    onChange={e => {
+                                        setNewContent(e.target.value)
+                                        if (postError) setPostError(null) // limpiar al escribir
+                                    }}
                                 />
+
+                                {/* ── ERROR de publicación (lenguaje inapropiado, etc.) ── */}
+                                {postError && (
+                                    <div className="comm-post-error">
+                                        <i className="fas fa-triangle-exclamation"></i>
+                                        <span>{postError}</span>
+                                        <button
+                                            className="comm-post-error__close"
+                                            onClick={() => setPostError(null)}
+                                            aria-label="Cerrar"
+                                        >
+                                            <i className="fas fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                )}
 
                                 {/* Preview imagen */}
                                 {(mainPicker.preview || mainPicker.error) && (
@@ -343,8 +397,8 @@ export default function RecommendationsIndex() {
                                             )}
                                         </div>
 
-                                        {/* Texto */}
-                                        <div className="comm-post__text">{comment.content}</div>
+                                        {/* ✅ Texto — ahora lee comment.text */}
+                                        <div className="comm-post__text">{comment.text}</div>
 
                                         {/* Imagen adjunta */}
                                         {comment.media_url && comment.media_type?.startsWith('image') && (
@@ -394,9 +448,27 @@ export default function RecommendationsIndex() {
                                                             className="comm-textarea comm-textarea--sm"
                                                             placeholder="Escribe tu respuesta..."
                                                             value={replyContent}
-                                                            onChange={e => setReplyContent(e.target.value)}
+                                                            onChange={e => {
+                                                                setReplyContent(e.target.value)
+                                                                if (replyError) setReplyError(null) // limpiar al escribir
+                                                            }}
                                                             autoFocus
                                                         />
+
+                                                        {/* ── ERROR de respuesta ── */}
+                                                        {replyError && (
+                                                            <div className="comm-post-error comm-post-error--reply">
+                                                                <i className="fas fa-triangle-exclamation"></i>
+                                                                <span>{replyError}</span>
+                                                                <button
+                                                                    className="comm-post-error__close"
+                                                                    onClick={() => setReplyError(null)}
+                                                                    aria-label="Cerrar"
+                                                                >
+                                                                    <i className="fas fa-xmark"></i>
+                                                                </button>
+                                                            </div>
+                                                        )}
 
                                                         {(replyPicker.preview || replyPicker.error) && (
                                                             <div className="comm-media-preview comm-media-preview--sm">
@@ -459,7 +531,8 @@ export default function RecommendationsIndex() {
                                                                     {formatDistanceToNow(reply.created_at)}
                                                                 </span>
                                                             </div>
-                                                            <p className="comm-reply__text">{reply.content}</p>
+                                                            {/* ✅ Texto de respuesta — ahora lee reply.text */}
+                                                            <p className="comm-reply__text">{reply.text}</p>
                                                             {reply.media_url && reply.media_type?.startsWith('image') && (
                                                                 <img
                                                                     src={reply.media_url}

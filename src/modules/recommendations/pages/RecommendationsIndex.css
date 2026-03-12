@@ -763,3 +763,64 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ══════════════════════════════════════════════════════════════
+   AGREGAR en RecommendationsIndex.css
+   Banner de error de publicación (lenguaje inapropiado, etc.)
+══════════════════════════════════════════════════════════════ */
+
+.comm-post-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    margin: 10px 0 4px;
+    background: rgba(192, 57, 43, 0.07);
+    border: 1px solid rgba(192, 57, 43, 0.35);
+    border-left: 4px solid #C0392B;
+    border-radius: 10px;
+    animation: comm-error-in 0.25s ease;
+}
+
+@keyframes comm-error-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+.comm-post-error i.fa-triangle-exclamation {
+    color: #C0392B;
+    font-size: 14px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.comm-post-error span {
+    flex: 1;
+    font-size: 13px;
+    color: #C0392B;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.comm-post-error__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(192, 57, 43, 0.5);
+    padding: 0 2px;
+    font-size: 13px;
+    transition: color 0.15s;
+    flex-shrink: 0;
+}
+.comm-post-error__close:hover {
+    color: #C0392B;
+}
+
+/* Variante más compacta para el reply box */
+.comm-post-error--reply {
+    margin: 8px 0;
+    padding: 10px 12px;
+    font-size: 12px;
+}
+.comm-post-error--reply span {
+    font-size: 12px;
+}
